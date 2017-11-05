@@ -13,6 +13,9 @@
     <!-- Styles -->
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
     <style>
+        body{
+            height:100%;
+        }
         /* Style the tab */
         div.tab {
             overflow: hidden;
@@ -47,6 +50,10 @@
             padding: 6px 12px;
             border: 1px solid #ccc;
             border-top: none;
+        }
+        .invisible{
+            display:none;
+
         }
     </style>
 </head>
