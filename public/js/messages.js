@@ -5,12 +5,12 @@ function popupChat(e)
     id = user.attr('title');
 
     console.log(id);
-    $('#game').addClass('invisible');
-    $('#message').removeClass('invisible')
 
+    var url = './messages/' + id;
 
-
-    myXHR('post',{id:is,message:'Hi!'},'');
+    myXHR('GET',url,{id:id},'');
+    $('.chatMessage').empty();
+    $('#receiver_id').attr('value',id);
 
 }
 
@@ -18,22 +18,42 @@ function send(e){
     var messageBox = $(e).prev();
     var message = messageBox.val();
     messageBox.val('');
-    var id = $(e).next().val();
-    //console.log(message);
-    myXHR('post',{id:id,message:message});
+    var id = $('#receiver_id').attr('value');
+    myXHR('POST','./messages',{id:id,message:message},'');
 }
 
 function putMessage(res){
 
+
+    $('#game').addClass('invisible');
+    $('#message').removeClass('invisible');
+    console.log("this should work");
+    console.log(res);
+    var messages = '';
+    if(res.length === 1)
+    {
+        res.forEach(function(e) {
+            messages = '<div><span>' + e.sender +'</span><p>'+ e.body +'</p></div>';
+            $('.chatMessage').append(messages);
+            $("#lst_saved").attr('value',e.created_at);
+        });return;
+    }
+        res.forEach(function(e) {
+            messages = '<div><span>' + e.sender +'</span><p>'+ e.body +'</p></div>';
+            $('.chatMessage').append(messages);
+            $("#lst_saved").attr('value',e.created_at);
+        });
+
+
 }
 
 
-function myXHR(methodName,data,id){
+function myXHR(methodName,url,data,id){
     $.ajax({
-        url: './messages',
+        url: url,
         headers: {'X-CSRF-TOKEN': $('input[name=_token]').val()},
         data: data,
-        type: 'POST',
+        type: methodName,
         datatype: 'JSON',
         beforeSend:function(){
             //turn on spinner if needed
@@ -53,3 +73,10 @@ function myXHR(methodName,data,id){
         console.log(err);
     }).done(function(response){putMessage(response);});
 }
+
+setInterval(function() {
+    var id = $('#receiver_id').attr('value');
+    var date = $('#lst_saved').attr('value');
+    var url = './messages/getMore/' + id+'/'+date;
+    myXHR('GET',url,{id:id},'');
+}, 2000);

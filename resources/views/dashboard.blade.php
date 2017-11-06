@@ -34,12 +34,16 @@
                                 <h5>Some User</h5>
                             </div>
                             <div>
-                                <div class="chatMessage" style="height:470px">
+                                <div class="chatMessage" style="height:470px; overflow: auto">
+
                                 </div>
                                 <div style="width:100%;color:#000;text-align:right">
                                     <input style="border:none;width:100%;height:40px;margin-top:5px;margin-bottom: 5px;" type="text" name="message" class="message">
                                     <button onclick="send(this)" style="border:1px solid #080808; -webkit-border-radius: 5px;-moz-border-radius: 5px;border-radius: 5px;background-color: #337ab7">Send</button>
-                                    <input type="hidden" value="'+id+'"></div>
+                                    <input id="receiver_id"type="hidden" >
+                                    <input id="lst_saved" type = "hidden">
+                                </div>
+
                             </div>
                         </div>
                 </div>

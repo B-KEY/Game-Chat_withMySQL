@@ -17,3 +17,4 @@ Auth::routes();
 
 Route::get('/dashboard', 'DashboardController@index');
 Route::resource('/messages','MessagesController');
+Route::get('/messages/getMore/{id}/{date}','MessagesController@getMore');
