@@ -79,4 +79,5 @@ setInterval(function() {
     var date = $('#lst_saved').attr('value');
     var url = './messages/getMore/' + id+'/'+date;
     myXHR('GET',url,{id:id},'');
-}, 2000);
+    var chatBox = $('.chatMessage');
+}, 1000);
