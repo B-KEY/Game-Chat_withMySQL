@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\User;
+use App\Group;
 
 class DashboardController extends Controller
 {
@@ -26,6 +27,7 @@ class DashboardController extends Controller
     public function index()
     {
         $users = User::all();
-        return view('dashboard')->with('users', $users);
+        $groups = Group::all();
+        return view('dashboard')->with('users', $users)->with('groups', $groups);
     }
 }

@@ -2,47 +2,67 @@
 function popupChat(e)
 {
     var user = $(e);
-    id = user.attr('title');
+    var id = user.attr('id');
+    var type = user.attr('title');
+
+    var url = './messages/' + id;
+    var userName = user.text();
+    $('#userName').text(userName);
+
+
+    myXHR('GET',url,{type:type},'');
+    $('.chatMessage').empty();
+    $('#receiver_id').attr('value',id);
+    $('#receiver_id').attr('title',type);
+}
+
+/*function popupGroupChat(e)
+{
+    var user = $(e);
+    id = user.attr('id');
 
     console.log(id);
 
     var url = './messages/' + id;
 
-    myXHR('GET',url,{id:id},'');
+    myXHR('GET',url,{type:'group'},'');
     $('.chatMessage').empty();
     $('#receiver_id').attr('value',id);
+    $('#reciever_id').attr('title','group');
+}*/
 
-}
-
-function send(e){
+function send(e) {
     var messageBox = $(e).prev();
     var message = messageBox.val();
     messageBox.val('');
     var id = $('#receiver_id').attr('value');
-    myXHR('POST','./messages',{id:id,message:message},'');
+    var type = $('#receiver_id').attr('title');
+    myXHR('POST','./messages',{id:id,message: message,type: type},'');
 }
 
-function putMessage(res){
+function putMessage(res) {
 
+    if(res.status){
+        $('#game').addClass('invisible');
+        $('#message').removeClass('invisible');
+        console.log(res);
+        if(res.data.length === 0)
+            return;
 
-    $('#game').addClass('invisible');
-    $('#message').removeClass('invisible');
-    console.log("this should work");
-    console.log(res);
-    var messages = '';
-    if(res.length === 1)
-    {
-        res.forEach(function(e) {
-            messages = '<div><span>' + e.sender +'</span><p>'+ e.body +'</p></div>';
-            $('.chatMessage').append(messages);
-            $("#lst_saved").attr('value',e.created_at);
-        });return;
-    }
-        res.forEach(function(e) {
-            messages = '<div><span>' + e.sender +'</span><p>'+ e.body +'</p></div>';
-            $('.chatMessage').append(messages);
+        res.data.forEach(function(e) {
+            message = '<div class="row" style="color:#090909;height:auto;' +
+                'border-bottom:1px solid #000;margin-top:5px;margin-bottom:5px;">' + '<div class="col-md-1"><img src="'+e.userimage+'" ' +
+                'style="height:40px;width:40px"><span style="font-size:12px;font-weight:300;font-style:Sans Serif">'+e.created_at+'</span></div>' +
+                '<div class="col-md-11"><h5 style="font-weight:bolder">'+e.username+'</h5><span>'+ e.body +'</span></div></div>';
+            $('.chatMessage').append(message);
             $("#lst_saved").attr('value',e.created_at);
         });
+    }
+    else{
+        //console.log(res.messages);
+        console.log(res);
+    }
+
 
 
 }
@@ -74,10 +94,10 @@ function myXHR(methodName,url,data,id){
     }).done(function(response){putMessage(response);});
 }
 
-setInterval(function() {
-    var id = $('#receiver_id').attr('value');
-    var date = $('#lst_saved').attr('value');
-    var url = './messages/getMore/' + id+'/'+date;
-    myXHR('GET',url,{id:id},'');
-    var chatBox = $('.chatMessage');
-}, 1000);
+// setInterval(function() {
+//     var id = $('#receiver_id').attr('value');
+//     var date = $('#lst_saved').attr('value');
+//     var url = './messages/getMore/' + id+'/'+date;
+//     myXHR('GET',url,{id:id},'');
+//     var chatBox = $('.chatMessage');
+// }, 1000);

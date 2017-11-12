@@ -35,18 +35,42 @@ class MessagesController extends Controller
      */
     public function store(Request $request)
     {
-        $message = new Message();
-        $id = $request->id;
-        $message->id = auth()->user()->id . '|' . $request->id;
-        $message->sender = auth()->user()->id;
-        $message->body = $request->message;
-        $message->available = true;
-        $message->receiver = $request->id;
-        $message->save();
-        $userid = auth()->user()->id . '|' . $id;
-        $userid2 = $id. '|' . auth()->user()->id;
-        $messages = Message::where('id',$userid)->orWhere('id',$userid2)->orderBy('created_at','desc')->take(1)->get();
-        return $messages;
+        $type = $request->type;
+
+        if(($type === 'group') ||($type=='individual')) {
+            $message = new Message();
+            $reciever_id = $request->id;
+            $sender_id = auth()->user()->id;
+            $message_id = $sender_id . '|' . $reciever_id;
+
+            ($type === 'group')? $message->id = $reciever_id: $message->id = $message_id;
+            $message->sender = $sender_id;
+            $message->body = $request->message;
+            $message->available = true;
+            $message->receiver = $reciever_id;
+            $message->save();
+
+            //retrieve the first row.
+            $search_param1 = $message_id;
+            $search_param2 = $reciever_id. '|' . auth()->user()->id;
+
+            ($request->type !== 'group') ? $messages  = Message::where('id',$search_param1)
+                    ->orWhere('id',$search_param2)->orderBy('created_at','desc')
+                    ->take(1)->get()
+                :
+                $messages = Message::where('id',$reciever_id)->orderBy('created_at','desc')
+                    ->take(1)->get();
+            foreach($messages as $msg) {
+                $data[] = ['body' => $msg->body, 'created_at' => $msg->created_at->format('H:i'),
+                    'username' => $msg->user->name, 'userimage' => $msg->user->image_url];
+            }
+            return array('status' => true, 'data' => $data);
+        }
+        else{
+            return array('status' => false, 'messages' =>'something went wrong');
+        }
+
+
     }
 
     /**
@@ -55,13 +79,36 @@ class MessagesController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show($id, Request $request)
+
     {
-        $userid = auth()->user()->id . '|' . $id;
-        $userid2 = $id. '|' . auth()->user()->id;
-        $mess = new Message();
-        $mal = $mess->where('id',$userid)->orWhere('id',$userid2)->get();
-        return $mal;
+
+        // apply encryption
+        $type = $request->type;
+
+        if(($type === 'group') ||($type=='individual')) {
+            $user_id1 = $id;
+            $user_id2 = auth()->user()->id;
+
+            $search_param1 = $user_id1 . '|' . $user_id2;
+            $search_param2 = $user_id2. '|' . $user_id1;
+
+            ($type!== 'group') ? $messages  = Message::where('id',$search_param1)->orWhere('id',$search_param2)
+                ->orderBy('created_at','desc')->get()
+                : $messages = Message::where('id',$id)->orderBy('created_at','desc')->get();
+
+            foreach($messages as $msg){
+                $data[] = ['body' => $msg->body , 'created_at' => $msg->created_at->format('H:i'),
+                                'username' => $msg->user->name, 'userimage' => $msg->user->image_url];
+            }
+
+            return array('status' => true, 'data' => $data);
+        }
+        else{
+            return array('status' => false, 'messages' =>'something went wrong');
+        }
+
+
     }
 
     /**
@@ -121,4 +168,6 @@ class MessagesController extends Controller
         //$messages = Message::where('created_at', '>', $date)->whereIn('id', $userid)return $messages;
         return $messages;
     }
+
+
 }
