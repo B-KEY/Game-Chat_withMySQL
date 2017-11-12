@@ -12,21 +12,25 @@
 
     <!-- Styles -->
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
+    <script src="https://use.fontawesome.com/0d79e5b86d.js"></script>
+
     <style>
         body{
             height:100%;
         }
+
         /* Style the tab */
         div.tab {
             overflow: hidden;
             border: 1px solid #ccc;
             background-color: #f1f1f1;
+            background-color: #4C516D;color:#fff;
         }
 
         /* Style the buttons inside the tab */
         div.tab button {
             background-color: inherit;
-            float: left;
+            float: right;
             border: none;
             outline: none;
             cursor: pointer;
@@ -36,19 +40,26 @@
 
         /* Change background color of buttons on hover */
         div.tab button:hover {
-            background-color: #ddd;
+            background:rgba(141,163,153,.4);
         }
 
         /* Create an active/current tablink class */
         div.tab button.active {
-            background-color: #ccc;
+            background:rgba(141,163,153,.4);
+        }
+        /*username style*/
+        div.tab span {
+            font-size:18px;
+            position:absolute;
+            top: 10px;
+            margin-left: 15px;
         }
 
         /* Style the tab content */
         .tabcontent {
             display: none;
             padding: 6px 12px;
-            border: 1px solid #ccc;
+            //border: 1px solid #ccc;
             border-top: none;
         }
         .invisible{
@@ -121,5 +132,7 @@
 <!-- Scripts -->
 <script src="{{ asset('js/app.js') }}"></script>
 <script src="{{ asset('js/messages.js') }}"></script>
+<script src="{{ asset('js/util.js') }}"></script>
+
 </body>
 </html>

@@ -60,6 +60,7 @@ class MessagesController extends Controller
                 :
                 $messages = Message::where('id',$reciever_id)->orderBy('created_at','desc')
                     ->take(1)->get();
+            $data = [];
             foreach($messages as $msg) {
                 $data[] = ['body' => $msg->body, 'created_at' => $msg->created_at->format('H:i'),
                     'username' => $msg->user->name, 'userimage' => $msg->user->image_url];
@@ -96,7 +97,7 @@ class MessagesController extends Controller
             ($type!== 'group') ? $messages  = Message::where('id',$search_param1)->orWhere('id',$search_param2)
                 ->orderBy('created_at','desc')->get()
                 : $messages = Message::where('id',$id)->orderBy('created_at','desc')->get();
-
+            $data = [];
             foreach($messages as $msg){
                 $data[] = ['body' => $msg->body , 'created_at' => $msg->created_at->format('H:i'),
                                 'username' => $msg->user->name, 'userimage' => $msg->user->image_url];

@@ -43,7 +43,7 @@ function send(e) {
 function putMessage(res) {
 
     if(res.status){
-        $('#game').addClass('invisible');
+        //$('#game').addClass('invisible');
         $('#message').removeClass('invisible');
         console.log(res);
         if(res.data.length === 0)
