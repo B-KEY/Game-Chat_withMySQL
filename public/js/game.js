@@ -35,11 +35,12 @@ function acceptChallenge(e){
         if(response){
             $('#gameBox').addClass('invisible');
             $('#playground').removeClass('invisible');
-            createPlaygroung();
+            createPlayground();
         }
     });
 
 }
+
 function makeElements(tag, attrs, isSVG) {
     var elem;
     (isSVG) ? elem=  document.createElementNS('http://www.w3.org/2000/svg', tag)
@@ -52,9 +53,9 @@ function makeElements(tag, attrs, isSVG) {
 }
 
 
-function createPlaygroung() {
-    for (x = 0, i = 0; x < 800; x += 100) {
-        for (y = 0; y < 800; y += 100) {
+function createPlayground() {
+    for (x = 0, i = 0; x < 500; x += 50) {
+        for (y = 0; y < 500; y += 50) {
             var square = makeElements('rect', {
                 x: x,
                 y: y,
@@ -103,3 +104,17 @@ function createPlaygroung() {
 //         console.log(err);
 //     });
 // }
+
+document.querySelector('input[type=button]').addEventListener('click', function(){rollTheDice();});
+
+var rollTheDice = function() {
+    var i,
+        faceValue,
+        output = '',
+        diceCount = document.querySelector('input[type=number]').value || 1;
+    for (i = 0; i < diceCount; i++) {
+        faceValue = Math.floor(Math.random() * 6);
+        output += "&#x268" + faceValue + "; ";
+    }
+    document.getElementById('dice').innerHTML = output;
+}

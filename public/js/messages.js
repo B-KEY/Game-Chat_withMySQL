@@ -55,7 +55,6 @@ function putMessage(res) {
         console.log(res);
         if(res.data.length === 0)
             return;
-
         res.data.forEach(function(e) {
             message = '<div class="row" style="color:#090909;height:auto;' +
                 'border-bottom:0.5px dashed rgba(0,0,0,0.1);margin-top:5px;margin-bottom:5px;">' + '<div class="col-md-1"><img src="'+e.userimage+'" ' +
@@ -68,8 +67,6 @@ function putMessage(res) {
     else{
         console.log(res);
     }
-
-
 
 }
 

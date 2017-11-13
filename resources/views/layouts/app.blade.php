@@ -116,6 +116,7 @@
             letter-spacing: 1px;
 
         }
+        #dice {font-size: 6rem;}
     </style>
 </head>
 <body>

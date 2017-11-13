@@ -68,9 +68,11 @@
                         </div>
                     <div id="playground" class="invisible">
                         <div>
-                            <svg id="gameBoard" width="800" height="800" style="border:2px solid #000;">
+                            <svg id="gameBoard" width="500" height="500" style="border:2px solid #000;">
                                 Sorry! Your browser doesn't support SVG.
                             </svg>
+                            <input type="number" min="1" max="6"> <input type="button" value="Roll">
+                            <div id="dice"></div>
 
                         </div>
                     </div>
