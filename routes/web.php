@@ -18,3 +18,6 @@ Auth::routes();
 Route::get('/dashboard', 'DashboardController@index');
 Route::resource('/messages','MessagesController');
 Route::get('/messages/getMore/{id}/{date}','MessagesController@getMore');
+Route::resource('/games','GameController');
+Route::post('/game/invite/{id}', 'GameController@invite');
+Route::post('/game/accept/{id}', 'GameController@accept');

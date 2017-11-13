@@ -8,7 +8,7 @@
     <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ config('app.name', 'Laravel') }}</title>
+    <title>{{ config('app.name', 'ConnectMe') }}</title>
 
     <!-- Styles -->
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
@@ -66,6 +66,56 @@
             display:none;
 
         }
+        #stat{
+            position: relative;
+            border: 0.5px solid rgba(141,163,153,.4);
+            height: 600px;
+        }
+        #stat #gameplayed{
+            position: absolute;
+            top: 20px;
+            left: 20px;
+        }
+        #stat #gamewon{
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+        #stat #gameloss{
+            position: absolute;
+            top: 140px;
+            left: 20px;
+        }
+        #stat #gamedrawn{
+            position: absolute;
+            top: 140px;
+            right: 20px;
+        }
+        #stat #rating{
+            position: absolute;
+            top: 260px;
+            left: 30%;
+        }
+
+        .statbox{
+            font-size: 20px;
+            height:100px;
+            background:rgba(255,255,255,.9);
+            color:#4C516D;
+            border-radius:10px;
+            border:0.5px dashed #4C516D;
+            width: 40%;
+            position:relative;
+            padding-left: 100px;
+            padding-top: 30px;
+            margin-top: 120px;
+        }
+
+        .statbox span{
+            font-size: 24px;
+            letter-spacing: 1px;
+
+        }
     </style>
 </head>
 <body>
@@ -83,8 +133,8 @@
                 </button>
 
                 <!-- Branding Image -->
-                <a class="navbar-brand" href="{{ url('/') }}">
-                    {{ config('app.name', 'Laravel') }}
+                <a class="navbar-brand" href="{{ url('/dashboard') }}">
+                    {{ config('app.name', 'ConnectMe') }}
                 </a>
             </div>
 
@@ -118,6 +168,9 @@
                                         {{ csrf_field() }}
                                     </form>
                                 </li>
+                                <li disabled>
+                                    <a href="#">User Setting</a>
+                                </li>
                             </ul>
                         </li>
                     @endif
@@ -133,6 +186,6 @@
 <script src="{{ asset('js/app.js') }}"></script>
 <script src="{{ asset('js/messages.js') }}"></script>
 <script src="{{ asset('js/util.js') }}"></script>
-
+<script src="{{ asset('js/game.js') }}"></script>
 </body>
 </html>

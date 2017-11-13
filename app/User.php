@@ -33,4 +33,10 @@ class User extends Authenticatable
     {
         return $this->hasMany('App\Message', 'sender');
     }
+    public function challenged(){
+        return $this->hasMany('App\Challenge','sender');
+    }
+    public function challengedTo(){
+        return $this->hasMany('App\Challenge','receiver');
+    }
 }

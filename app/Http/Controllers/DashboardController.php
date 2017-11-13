@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\User;
 use App\Group;
+use App\Challenge;
 
 class DashboardController extends Controller
 {
@@ -26,8 +27,16 @@ class DashboardController extends Controller
      */
     public function index()
     {
+        $user_id = auth()->user()->id;
+        $challenge = Challenge::where('receiver', $user_id)->get();
+        $challenges = [];
+        foreach($challenge as $c) {
+            $challenges[] = ['challenger_id' => $c->sender, 'challenger' => $c->haveChallenged->name];
+        }
+
         $users = User::all();
         $groups = Group::all();
-        return view('dashboard')->with('users', $users)->with('groups', $groups);
+        return view('dashboard')->with('users', $users)->with('groups', $groups)->with('challenges',$challenges);
+
     }
 }
