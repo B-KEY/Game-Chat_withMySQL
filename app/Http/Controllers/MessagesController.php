@@ -94,8 +94,8 @@ class MessagesController extends Controller
             $search_param2 = $user_id2. '|' . $user_id1;
 
             ($type!== 'group') ? $messages  = Message::where('id',$search_param1)->orWhere('id',$search_param2)
-                ->orderBy('created_at','desc')->get()
-                : $messages = Message::where('id',$id)->orderBy('created_at','desc')->get();
+                ->get()
+                : $messages = Message::where('id',$id)->get();
             $data = [];
             foreach($messages as $msg){
                 $data[] = ['body' => $msg->body , 'created_at' => $msg->created_at->format('H:i'),

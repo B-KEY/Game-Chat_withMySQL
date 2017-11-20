@@ -43,7 +43,7 @@ var util = {
         $('#playground').removeClass('invisible');
         $('#challenge').addClass('invisible');
         $('#invite_message_sent').addClass('invisible');
-        $('#groupText').addClass('invisibel');
+        $('#groupText').addClass('invisible');
         //createPlayground();
         game.init();
     },
@@ -52,7 +52,7 @@ var util = {
         $('#invite_message_sent').removeClass('invisible');
         $('#challenge').addClass('invisible');
         $('#playground').addClass('invisible');
-        $('#groupText').addClass('invisibel');
+        $('#groupText').addClass('invisible');
     },
 
 
@@ -61,14 +61,14 @@ var util = {
         $('#challenge').removeClass('invisible');
         $('#invite_message_sent').addClass('invisible');
         $('#playground').addClass('invisible');
-        $('#groupText').addClass('invisibel');
+        $('#groupText').addClass('invisible');
     },
 
     clearGameSection: function(){
     $('#challenge').addClass('invisible');
     $('#invite_message_sent').addClass('invisible');
     $('#playground').addClass('invisible');
-    $('#groupText').addClass('invisibel');
+    $('#groupText').addClass('invisible');
     }
 };
 

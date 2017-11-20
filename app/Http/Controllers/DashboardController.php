@@ -34,7 +34,7 @@ class DashboardController extends Controller
             $challenges[] = ['challenger_id' => $c->sender, 'challenger' => $c->haveChallenged->name];
         }
 
-        $users = User::all();
+        $users = User::where('id','!=',$user_id)->get();
         $groups = Group::all();
         return view('dashboard')->with('users', $users)->with('groups', $groups)->with('challenges',$challenges);
 
