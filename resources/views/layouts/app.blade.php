@@ -117,6 +117,10 @@
 
         }
         #dice {font-size: 6rem;}
+        .cells_white{
+            fill: white;
+            stroke-width: 1px; stroke: green;
+        }
     </style>
 </head>
 <body>
@@ -184,9 +188,14 @@
 </div>
 
 <!-- Scripts -->
+
 <script src="{{ asset('js/app.js') }}"></script>
-<script src="{{ asset('js/messages.js') }}"></script>
 <script src="{{ asset('js/util.js') }}"></script>
+<script src="{{ asset('js/Objects/Cells.js') }}"></script>
+<script src="{{ asset('js/manager.js') }}"></script>
+<script src="{{ asset('js/messages.js') }}"></script>
 <script src="{{ asset('js/game.js') }}"></script>
+
+
 </body>
 </html>

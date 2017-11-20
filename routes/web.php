@@ -21,3 +21,4 @@ Route::get('/messages/getMore/{id}/{date}','MessagesController@getMore');
 Route::resource('/games','GameController');
 Route::post('/game/invite/{id}', 'GameController@invite');
 Route::post('/game/accept/{id}', 'GameController@accept');
+Route::get('/game/challenge/{id}', 'GameController@getChallenges');

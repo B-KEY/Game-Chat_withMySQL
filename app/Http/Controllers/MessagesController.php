@@ -71,7 +71,6 @@ class MessagesController extends Controller
             return array('status' => false, 'messages' =>'something went wrong');
         }
 
-
     }
 
     /**
@@ -87,7 +86,7 @@ class MessagesController extends Controller
         // apply encryption
         $type = $request->type;
 
-        if(($type === 'group') ||($type=='individual')) {
+        if(($type === 'group') || ($type=='individual')) {
             $user_id1 = $id;
             $user_id2 = auth()->user()->id;
 
@@ -164,7 +163,6 @@ class MessagesController extends Controller
             ['id', '=', $userid2],
             ['created_at', '>', $date]
         ])->orderBy('created_at','desc')->take(1)->get();
-        ;
         //return $date;
         //$messages = Message::where('created_at', '>', $date)->whereIn('id', $userid)return $messages;
         return $messages;

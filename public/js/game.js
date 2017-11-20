@@ -1,111 +1,38 @@
 
-function invite(e){
-    var opponent = $('#opponent_id').attr('value');
-    console.log(opponent);
-    var url = './game/invite/'+ opponent;
-    myXHR('POST',url,'','').done(function(response){
-        setGame(response);
-        console.log(response);
-    });
-}
-
-function setGame(res){
-
-    if(res.status)
-    {
-            console.log(res.data.message);
-            $('#invite_message').removeClass('invisible');
-            $('#invite_message').prev().remove();
-
-       console.log(res.data);
-    }
-    else{
-            console.log(res.data);
-    }
-
-}
-
-function showChallenges(e){
-    $('#showChallengers').toggleClass('invisible');
-}
-function acceptChallenge(e){
-    var id = $(e).attr('id');
-    var url = './game/accept/' + id;
-    myXHR('POST',url,'','').done(function(response){
-        if(response){
-            $('#gameBox').addClass('invisible');
-            $('#playground').removeClass('invisible');
-            createPlayground();
-        }
-    });
-
-}
-
-function makeElements(tag, attrs, isSVG) {
-    var elem;
-    (isSVG) ? elem=  document.createElementNS('http://www.w3.org/2000/svg', tag)
-        : elem = document.createElement(tag);
-
-    for (var k in attrs) {
-        elem.setAttribute(k, attrs[k]);
-    }
-    return elem;
-}
-
-
-function createPlayground() {
-    for (x = 0, i = 0; x < 500; x += 50) {
-        for (y = 0; y < 500; y += 50) {
-            var square = makeElements('rect', {
-                x: x,
-                y: y,
-                width: 100,
-                height: 100,
-                fill: (i++ % 2 === 0) ? 'white' : 'black'
-            }, true);
-            $('#gameBoard').append(square);
-
-            square.onmousedown = function () {
-                console.log($(this).attr('fill'));
-            }
-        }
-        i++;
-    }
-}
-
+// function makeElements(tag, attrs, isSVG) {
+//     var elem;
+//     (isSVG) ? elem=  document.createElementNS('http://www.w3.org/2000/svg', tag)
+//         : elem = document.createElement(tag);
+//
+//     for (var k in attrs) {
+//         elem.setAttribute(k, attrs[k]);
+//     }
+//     return elem;
+// }
 //
 //
-// function myXHR(methodName,url,data,id){
-//     $.ajax({
-//         url: url,
-//         headers: {'X-CSRF-TOKEN': $('input[name=_token]').val()},
-//         data: data,
-//         type: methodName,
-//         datatype: 'JSON',
-//         success: function(response){
-//             setGame(response);
-//             console.log(response);
-//         },
-//         beforeSend:function(){
-//             //turn on spinner if needed
-//             if(id){
-//                 $(id).append('<img src="path/spinner.jpg" class="spinner"/>');
+// function createPlayground() {
+//     for (x = 0, i = 0; x < 500; x += 50) {
+//         for (y = 0; y < 500; y += 50) {
+//             var square = makeElements('rect', {
+//                 x: x,
+//                 y: y,
+//                 width: 100,
+//                 height: 100,
+//                 fill: 'rgb(' + Math.floor(Math.random()*255) +','+ Math.floor(Math.random()*255) +','+ Math.floor(Math.random()*255) +')'
+//             }, true);
+//             $('#gameBoard').append(square);
+//
+//             square.onmousedown = function () {
+//                 console.log($(this).attr('fill'));
 //             }
 //         }
-//     }).always(function(){
-//         //clean up, kill spinner
-//         if(id){
-//             $(id).find('.spinner').fadeOut(2000,function(){
-//                 $(this).remove();
-//             });
-//         }
-//     }).fail(function(err){
-//         //put message out
-//         console.log(err);
-//     });
-// }
+//         i++;
+//     }
+//}
 
-document.querySelector('input[type=button]').addEventListener('click', function(){rollTheDice();});
+
+document.querySelector('input[type=button]').addEventListener('click', function(){game.roll();});
 
 var rollTheDice = function() {
     var i,
@@ -117,4 +44,43 @@ var rollTheDice = function() {
         output += "&#x268" + faceValue + "; ";
     }
     document.getElementById('dice').innerHTML = output;
+}
+
+var game = {
+    xhtmlns:"http://www.w3.org/1999/xhtml",
+        svgns:"http://www.w3.org/2000/svg",
+        BOARDX:40,				//starting pos of board
+        BOARDY:40,				//look above
+        boardArr:new Array(),		//2d array [row][col]
+        //pieceArr:new Array(),		//2d array [player][piece] (player is either 0 or 1)
+        BOARDWIDTH:10,				//how many squares across
+        BOARDHEIGHT:10,			//how many squares down
+        CELLSIZE:50,
+        init: function () {
+        //create a parent to stick board in...
+        var gEle = document.createElementNS(game.svgns, 'g');
+        gEle.setAttributeNS(null, 'transform', 'translate(' + game.BOARDX + ',' + game.BOARDY + ')');
+        gEle.setAttributeNS(null, 'id', 'gId_' + 'something');
+        //stick g on board
+        document.getElementsByTagName('svg')[0].appendChild(gEle);
+        //create the board...
+        //var x = new Cell(document.getElementById('someIDsetByTheServer'),'cell_00',CELLSIZE,0,0);
+        for (i = 0; i < game.BOARDWIDTH; i++) {
+            game.boardArr[i] = new Array();
+            for (j = 0; j < game.BOARDHEIGHT; j++) {
+                game.boardArr[i][j] = new Cell(document.getElementById('gId_' + 'something'), 'cell_' + j + i, game.CELLSIZE, j, i);
+            }
+        }
+    },
+
+    roll: function(){
+
+        url = './games';
+        manager.myXHR('POST', url, {id: 1}).done(function(res){
+            var output =''
+            var faceValue = res.dice_value;
+            output += "&#x268" + faceValue + "; ";
+            document.getElementById('dice').innerHTML = output;
+        });
+    }
 }
