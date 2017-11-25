@@ -30,6 +30,7 @@ manager = {
         manager.myXHR('POST',url,'','').done(function(response){
             if(response){
                 util.showPlayGround();
+                game.init(response);
             }
         });
     },

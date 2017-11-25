@@ -21,7 +21,7 @@ var util = {
     evt.currentTarget.className += " active";
     var id = $('#receiver_id').attr('value');
     var type = $('#receiver_id').attr('title');
-    if(section === 'chat-section') {getAllMessages(id, type);} else {
+    if(section === 'chat-section') {messages.getAllMessages(id, type);} else {
         if(type === 'group') {
             $('#challenge').addClass('invisible');
             $('#invite_message_sent').addClass('invisible');
@@ -45,7 +45,7 @@ var util = {
         $('#invite_message_sent').addClass('invisible');
         $('#groupText').addClass('invisible');
         //createPlayground();
-        game.init();
+
     },
 
     showInviteMessage: function(){
@@ -69,6 +69,10 @@ var util = {
     $('#invite_message_sent').addClass('invisible');
     $('#playground').addClass('invisible');
     $('#groupText').addClass('invisible');
+    },
+
+    setTransform:function(id,x,y){
+        document.getElementById(id).setAttributeNS(null,'transform','translate('+x+','+y+')');
     }
 };
 

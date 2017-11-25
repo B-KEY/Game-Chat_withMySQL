@@ -115,6 +115,7 @@
                                                     <button onclick="send(this)" style="border:1px solid #080808;
                                              -webkit-border-radius: 5px;-moz-border-radius: 5px;border-radius:
                                              5px;background-color: #337ab7">Send</button>
+                                                    <input type="hidden" id="gameID">
                                                 </div>
                                             </div>
                                         </div>

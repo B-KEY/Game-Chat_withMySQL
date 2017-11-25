@@ -192,6 +192,7 @@
 <script src="{{ asset('js/app.js') }}"></script>
 <script src="{{ asset('js/util.js') }}"></script>
 <script src="{{ asset('js/Objects/Cells.js') }}"></script>
+<script src="{{ asset('js/Objects/Pieces.js') }}"></script>
 <script src="{{ asset('js/manager.js') }}"></script>
 <script src="{{ asset('js/messages.js') }}"></script>
 <script src="{{ asset('js/game.js') }}"></script>

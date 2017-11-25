@@ -17,18 +17,24 @@ class CreateGameMovesTable extends Migration
             $table->increments('id');
             $table->integer('game_id');
             $table->integer('whoseTurn');
+            $table->string('player0_id');
+            $table->string('player0_pieceId');
+            $table->integer('player0_diceValue');
+            $table->string('player0_fromPosition');
+            $table->string('player0_toPosition');
+            $table->string('player0_moveType');
+            $table->string('player0_score');
+            $table->string('player0_difference');
+
             $table->string('player1_id');
-            $table->string('player1piece_id');
-            $table->integer('player1dice_value');
-            $table->string('player1from_position');
-            $table->string('player1to_position');
-            $table->string('player1move_type');
-            $table->string('player2_id');
-            $table->string('player2piece_id');
-            $table->integer('playee2dice_value');
-            $table->string('player2from_position');
-            $table->string('player2to_position');
-            $table->string('player2move_type');
+            $table->string('player1_pieceId');
+            $table->integer('player1_diceValue');
+            $table->string('player1_fromPosition');
+            $table->string('player1_toPosition');
+            $table->string('player1_moveType');
+            $table->string('player1_score');
+            $table->string('player1_difference');
+
             $table->timestamps();
 
         });

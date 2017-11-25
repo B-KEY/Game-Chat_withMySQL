@@ -27,6 +27,7 @@ function Cell(parent,id,size,row,col){
     this.object=this.create();
     this.parent.appendChild(this.object);
     //this.myBBox = this.getMyBBox();
+    console.log(this.myBBox);
 }
 
 
@@ -46,7 +47,6 @@ Cell.prototype={
         rectEle.setAttributeNS(null,'height',this.size+'px');
         rectEle.setAttributeNS(null,'class', 'cells_white');
         rectEle.setAttributeNS(null,'id',this.id);
-        //rectEle.setAttributeNS(null, 'style','border:2px solid white;');
         rectEle.onclick=function(){alert(this.id);};
         return rectEle;
     },

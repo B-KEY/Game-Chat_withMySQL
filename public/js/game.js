@@ -52,35 +52,52 @@ var game = {
         BOARDX:40,				//starting pos of board
         BOARDY:40,				//look above
         boardArr:new Array(),		//2d array [row][col]
-        //pieceArr:new Array(),		//2d array [player][piece] (player is either 0 or 1)
-        BOARDWIDTH:10,				//how many squares across
-        BOARDHEIGHT:10,			//how many squares down
-        CELLSIZE:50,
-        init: function () {
+        pieceArr:new Array(),		//2d array [player][piece] (player is either 0 or 1)
+        BOARDWIDTH:0,				//how many squares across
+        BOARDHEIGHT:0,			//how many squares down
+        CELLSIZE:0,
+        PLAYERONE: '',
+        PLAYERTWO: '',
+        init: function (res) {
         //create a parent to stick board in...
         var gEle = document.createElementNS(game.svgns, 'g');
         gEle.setAttributeNS(null, 'transform', 'translate(' + game.BOARDX + ',' + game.BOARDY + ')');
-        gEle.setAttributeNS(null, 'id', 'gId_' + 'something');
+        gEle.setAttributeNS(null, 'id', 'gId_' + res.data.gameData.gameID);
         //stick g on board
         document.getElementsByTagName('svg')[0].appendChild(gEle);
         //create the board...
-        //var x = new Cell(document.getElementById('someIDsetByTheServer'),'cell_00',CELLSIZE,0,0);
+        game.BOARDHEIGHT = res.data.gameData.height;
+        game.BOARDWIDTH =  res.data.gameData.width;
+        game.CELLSIZE  = res.data.gameData.size;
+        console.log(game.BOARDWIDTH);
+            console.log(game.BOARDHEIGHT);
+
         for (i = 0; i < game.BOARDWIDTH; i++) {
             game.boardArr[i] = new Array();
             for (j = 0; j < game.BOARDHEIGHT; j++) {
-                game.boardArr[i][j] = new Cell(document.getElementById('gId_' + 'something'), 'cell_' + j + i, game.CELLSIZE, j, i);
+                game.boardArr[i][j] = new Cell(document.getElementById('gId_' + res.data.gameData.gameID), 'cell_' + j + i, game.CELLSIZE, j, i);
             }
         }
-    },
+        PLAYERONE=new Piece('game_'+res.data.gameData.gameID,0,Number(res.data.gameData.positionX),Number(res.data.gameData.positionY),'SnakeLadder',0);
+        PLAYERTWO=new Piece('game_'+res.data.gameData.gameID,1,Number(res.data.gameData.positionX)+1,Number(res.data.gameData.positionY),'SnakeLadder',0);
+        $('#gameID').attr('value',res.data.gameData.gameID);
+        },
 
     roll: function(){
-
         url = './games';
-        manager.myXHR('POST', url, {id: 1}).done(function(res){
-            var output =''
-            var faceValue = res.dice_value;
+        gameID= $('#gameID').attr('value');
+        manager.myXHR('POST', url, {gameID:gameID}).done(function(res){
+            var output ='';
+            var faceValue = res.diceValue;
             output += "&#x268" + faceValue + "; ";
             document.getElementById('dice').innerHTML = output;
+            game.playForUser(gameID);
+        });
+    },
+    playForUser : function(gameID){
+        url = './games/'+ gameID;
+        manager.myXHR('GET', url).done(function(res){
+            util.setTransform('piece_0|0',game.boardArr[Number(res.X)][Number(res.Y)].getCenterX(),game.boardArr[Number(res.X)][Number(res.Y)].getCenterY());
         });
     }
 }
