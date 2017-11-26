@@ -6,32 +6,26 @@ var messages = {
         var user = $(e);
         var id = user.attr('id');
         var type = user.attr('title');
-        console.log(type);
-        messages.getAllMessages(id,type);
-        $('#userName').text(user.text());
-        $('.chatMessage').empty();
         $('#receiver_id').attr('value',id);
         $('#receiver_id').attr('title',type);
-        $('#opponent_id').attr('value',id);
+        $('#game-section').empty();
+
+        $('#userName').text(user.text());
+        manager.getUserData(id,type);
+        $('.chatMessage').empty();
+
         //show the chat option once clicked on user.
-        $('#chat-section').css('display',"block");
-        $('.tabcontent').last().css('display','none');
-        $('.tablinks').removeClass("active");
-        $('.tablinks').first().addClass("active");
+
+        // $('#chat-section').css('display',"block");
+
+
+        // $('.tabcontent').last().css('display','none');
+        // $('.tablinks').removeClass("active");
+        // $('.tablinks').first().addClass("active");
     },
 
 
-    /**
-     * This function is used to get all the messges between individual or group users.
-     * @param id id of the receiver.
-     * @param type type of the user.
-     */
-    getAllMessages:function (id,type) {
-        var url = './messages/' + id;
-        manager.myXHR('GET',url,{type:type},'').done(function(response){
-            messages.putMessage(response);
-        });
-    },
+
 
 
     /**
@@ -64,23 +58,18 @@ var messages = {
         $("#lst_saved").attr('value',e.created_at);
         });
     },
+    putMessage :function(res) {
+        if(res.status) {
 
+            if (res.data.length === 0) return;
+            if (res.data.length === 1) messages.createChat(res);
+            else {
+                $('.chatMessage').empty();
+                messages.createChat(res);
+            }
+        }
+    }
 
-    putMessage:function(res) {
-    if(res.status){
-        $('#game').removeClass('invisible');
-        $('#game').prev().remove();
-        console.log(res);
-        if(res.data.length === 0) return;
-        if(res.data.length === 1) createChat(res);
-        else{
-            $('.chatMessage').empty();
-            messages.createChat(res);
-        }
-        } else    {
-            console.log(res);
-        }
-    },
 }
 
 

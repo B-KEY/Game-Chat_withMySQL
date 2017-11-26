@@ -44,99 +44,60 @@
                 -->
                 <div id="game" class="invisible">
                     <div class="tab">
-                        <span id="userName"></span>
-                        <button class="tablinks" onclick="util.openSection(event, 'chat-section')">Chat</button>
-                        <button class="tablinks" onclick="util.openSection(event, 'game-section')">Game</button>
+                        <span  id="userName"></span>
+                        {{--<button class="tablinks" onclick="util.openSection(event, 'chat-section')">Chat</button>--}}
+                        {{--<button class="tablinks" onclick="util.openSection(event, 'game-section')">Game</button>--}}
+                        <span class="inviteThisUser invisible" id="inviteThisUser"><img src="images/challenge.png"  style="height:40px;width:40px;cursor:pointer;" title= 'Challenge This User' onclick="manager.invite(this)"/></span>
                     </div>
 
-                    <div id="chat-section" class="tabcontent">
-                        <div id="message" style="height:100%;" >
-                            <div>
-                                <div style="padding:5px;width:100%;height:535px;overflow:hidden;" class="chatBox">
-                                    <div>
-                                        <div class="chatMessage" style="height:430px; overflow-x:hidden; overflow-y:auto;">
-                                        </div>
-                                        <div style="width:100%;color:#000;text-align:right">
-                                            <input style="border:none;width:100%;height: 50px;margin-top:10px;margin-bottom: 5px; padding:10px
-                                                ;background:rgba(141,163,153,.4)border-radius: 5px;"
-                                               type="text" name="message" class="message"  placeholder="Type your message">
-                                            <button onclick="send(this)" style="border:1px solid #080808;
-                                             -webkit-border-radius: 5px;-moz-border-radius: 5px;border-radius:
-                                             5px;background-color: #337ab7">Send</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    <div class="row">
 
-                    <div id="game-section" class="tabcontent">
+                        <div id="game-section" class="">
+
                             <!--
                              ***********************************************************************************************
                              Show this section when the user has not invited the viewed user to play.
                              ***********************************************************************************************
                             -->
-                            <div id="challenge" style="margin-left: 30px;text-align:left;" class="invisible">
-                                <label id="userNameToChallenge" style="margin-top:40px;">SomeUser Name</label><br>
-                                <textarea style=" width: 70%;; height: 150px;border-radius: 10px;
-                                border: 2px solid #444;padding: 20px"
-                                        placeholder="Enter text you send(optional)"></textarea><br>
-                                <img src="images/challenge.png"  style="margin-top:20px;height:50px;width:50px;cursor:pointer;" onclick="manager.invite(this)"/>
-                            </div>
 
-
-                            <div id="invite_message_sent" class="invisible">
-                                <h3>Your request has been sent.</h3>
-                                <span>Game will begin once the user accept the request</span>
-                            </div>
-                            <input id="opponent_id" type="hidden" >
-                        <div id="playground" class="invisible">
-                            <div class="row">
-                                {{--<svg id="gameBoard" width="500" height="500" style="border:2px solid #000;">--}}
-                                    {{--Sorry! Your browser doesn't support SVG.--}}
-                                {{--</svg>--}}
-                                <div class="col-md-8">
-                                    <svg xmlns="http://www.w3.org/2000/svg"
-                                         version="1.1"  width="600px" height="600px">
-                                    </svg>
-                                </div>
-                                <div class="col-md-4">
-                                   <input type="button" value="Roll">
-                                    <div id="dice"></div>
-                                    <div>
-                                        <div style="padding:5px;width:100%;height:535px;overflow:hidden;" class="chatBox">
-                                            <div>
-                                                <div class="chatMessage" style="height:430px; overflow-x:hidden; overflow-y:auto;">
-                                                </div>
-                                                <div style="width:100%;color:#000;text-align:right">
-                                                    <input style="border:none;width:100%;height: 50px;margin-top:10px;margin-bottom: 5px; padding:10px
+                        </div>
+                        <div id="chat-section" class="" style="margin-top:40px;">
+                            <div id="message" style="height:100%;" >
+                                <div>
+                                    <div style="padding:5px;width:100%;height:535px;overflow:hidden;" class="chatBox">
+                                        <div>
+                                            <div class="chatMessage" style="height:430px; overflow-x:hidden; overflow-y:auto;">
+                                            </div>
+                                            <div style="width:100%;color:#000;text-align:right">
+                                                <input style="border:none;width:100%;height: 50px;margin-top:10px;margin-bottom: 5px; padding:10px
                                                 ;background:rgba(141,163,153,.4)border-radius: 5px;"
-                                                           type="text" name="message" class="message"  placeholder="Type your message">
-                                                    <button onclick="send(this)" style="border:1px solid #080808;
+                                                       type="text" name="message" class="message"  placeholder="Type your message">
+                                                <button onclick="messages.send(this)" style="border:1px solid #080808;
                                              -webkit-border-radius: 5px;-moz-border-radius: 5px;border-radius:
                                              5px;background-color: #337ab7">Send</button>
-                                                    <input type="hidden" id="gameID">
-                                                </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-
                             </div>
                         </div>
-                        <div id="groupText" class="invisible">
-                            <h4>Sorry! This option is not yet available for Group.</h4>
-                        </div>
+
+
                     </div>
+                    <input id="receiver_id" type="hidden" >
+                    <input id="lst_saved" type = "hidden">
+                    <input id="gameID" type="hidden">
+
                 </div>
-                <input id="receiver_id" type="hidden" >
-                <input id="lst_saved" type = "hidden">
+                <!--
+                ***********************************************************************************************
+                    Game section ends here
+                ***********************************************************************************************
+                -->
             </div>
-            <!--
-            ***********************************************************************************************
-                Game section ends here
-            ***********************************************************************************************
-            -->
+
+
+
             <div class="col-md-3" style="background:#4C516D;color:white;height:600px;">
 
                 <div style="text-align:right">@if(count($challenges)>0)<span style="font-size:18px">{{count($challenges)}}</span> @endif

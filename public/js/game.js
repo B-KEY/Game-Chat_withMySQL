@@ -32,7 +32,7 @@
 //}
 
 
-document.querySelector('input[type=button]').addEventListener('click', function(){game.roll();});
+
 
 var rollTheDice = function() {
     var i,
@@ -58,6 +58,17 @@ var game = {
         CELLSIZE:0,
         PLAYERONE: '',
         PLAYERTWO: '',
+        INVITED_DIV: '<div id="invite_message_sent">' +
+        '<h3>Your request has been sent.</h3>' +
+        '<span>Game will begin once the user accept the request</span></div>',
+        PLAYGOUND_DIV:' <div id="playground" style="position:relative;border-right: 1px solid #4C516D;">' +
+        '<svg xmlns="http://www.w3.org/2000/svg" version="1.1"  width="600px" height="600px">' +
+        'Sorry! Your browser doesn\'t support SVG.' +
+        '</svg>' +
+        '<div style="position:absolute;top:30px;right:30px"><input type="button" value="Roll">' +
+        '<div id="dice"></div></div>' +
+        '</div>',
+
         init: function (res) {
         //create a parent to stick board in...
         var gEle = document.createElementNS(game.svgns, 'g');
@@ -71,16 +82,21 @@ var game = {
         game.CELLSIZE  = res.data.gameData.size;
         console.log(game.BOARDWIDTH);
             console.log(game.BOARDHEIGHT);
+         var num = 100;
 
-        for (i = 0; i < game.BOARDWIDTH; i++) {
+        for (i = 0; i <game.BOARDWIDTH ; i++) {
             game.boardArr[i] = new Array();
-            for (j = 0; j < game.BOARDHEIGHT; j++) {
-                game.boardArr[i][j] = new Cell(document.getElementById('gId_' + res.data.gameData.gameID), 'cell_' + j + i, game.CELLSIZE, j, i);
+            for (j = 0; j <game.BOARDHEIGHT; j++) {
+                game.boardArr[i][j] = new Cell(document.getElementById('gId_' + res.data.gameData.gameID), 'cell_' + j + i, game.CELLSIZE, i, j,num);
+                (i%2===0)?num--:num++;
             }
+            (i%2===0)?num++:num--;
+            num-=10;
         }
         PLAYERONE=new Piece('game_'+res.data.gameData.gameID,0,Number(res.data.gameData.positionX),Number(res.data.gameData.positionY),'SnakeLadder',0);
         PLAYERTWO=new Piece('game_'+res.data.gameData.gameID,1,Number(res.data.gameData.positionX)+1,Number(res.data.gameData.positionY),'SnakeLadder',0);
         $('#gameID').attr('value',res.data.gameData.gameID);
+        document.querySelector('input[type=button]').addEventListener('click', function(){game.roll();});
         },
 
     roll: function(){

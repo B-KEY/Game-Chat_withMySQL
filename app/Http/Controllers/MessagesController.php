@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Message;
+use App\Challenge;
 
 class MessagesController extends Controller
 {
@@ -82,27 +83,34 @@ class MessagesController extends Controller
     public function show($id, Request $request)
 
     {
-
         // apply encryption
         $type = $request->type;
-
         if(($type === 'group') || ($type=='individual')) {
             $user_id1 = $id;
             $user_id2 = auth()->user()->id;
+            $challengeData = [];
 
-            $search_param1 = $user_id1 . '|' . $user_id2;
-            $search_param2 = $user_id2. '|' . $user_id1;
+            $searchParam1 = $user_id1 . '|' . $user_id2;
+            $searchParam2 = $user_id2 . '|' . $user_id1;
 
-            ($type!== 'group') ? $messages  = Message::where('id',$search_param1)->orWhere('id',$search_param2)
+            ($type !== 'group') ? $messages = Message::where('id', $searchParam1)->orWhere('id', $searchParam2)
                 ->get()
-                : $messages = Message::where('id',$id)->get();
+                : $messages = Message::where('id', $id)->get();
             $data = [];
-            foreach($messages as $msg){
-                $data[] = ['body' => $msg->body , 'created_at' => $msg->created_at->format('H:i'),
-                                'username' => $msg->user->name, 'userimage' => $msg->user->image_url];
+            foreach ($messages as $msg) {
+                $data[] = ['body' => $msg->body, 'created_at' => $msg->created_at->format('H:i'),
+                    'username' => $msg->user->name, 'userimage' => $msg->user->image_url];
+            }
+            if ($type === 'individual') {
+                $challenge = Challenge::where('id', $searchParam1)->orWhere('id', $searchParam2)
+                    ->first();
+                if ($challenge) {
+                    $challengeData = ['challengeStatus' => $challenge->status];
+                }
             }
 
-            return array('status' => true, 'data' => $data);
+
+            return array('status' => true, 'data' => $data, 'challengeData'=>$challengeData);
         }
         else{
             return array('status' => false, 'messages' =>'something went wrong');

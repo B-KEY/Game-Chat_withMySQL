@@ -109,9 +109,11 @@ function SnakeLadder(parent) {
     if(this.parent.player == 'playerId'){
         this.piece.setAttributeNS(null, 'style','cursor: pointer');
     }
-    this.newCord1 = this.parent.x - 10;
-    this.newCord2 = this.parent.y -10;
+    this.newCord1 = this.parent.x;
+    this.newCord2 = this.parent.y;
+
     this.piece.setAttributeNS(null, 'transform', 'translate('+ this.newCord1+','+this.newCord2+')');
+    this.piece.setAttributeNS(null,"opacity",'0.5');
 
     //create the svg snakeLadder piece.
     var rect = document.createElementNS(game.svgns, 'rect');
@@ -119,5 +121,4 @@ function SnakeLadder(parent) {
     rect.setAttributeNS(null, 'height', '20');
     this.piece.appendChild(rect);
     return this;
-
 }

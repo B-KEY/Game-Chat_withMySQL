@@ -37,13 +37,28 @@ class GameController extends Controller
     public function store(Request $request)
     {
         // check if the game_id exist
-        if($request->gameID!= '')
+        if($request->gameID != '')
         {
+
             $gameID = $request->gameID;
+
+            $diceValue = rand(1,6);
 
             $gameMove = GameMove:: where('game_id', $gameID)->first();
 
-            $diceValue = rand(1,6);
+            if($gameMove->whoseTurn !== auth()->user()->id)
+                return array('diceValue'=>$diceValue, 'message'=>'Not Your Turn', 'status'=>true);
+
+            if($gameMove->player0_diceValue != 0) {
+                $user = $gameMove->player0_id;
+                $user2 = $gameMove->player1_id;
+                $searchParam1 = $user . '|' . $user2;
+                $searchParam2 = $user2 . '|' . $user;
+                $challenge = Challenge::where('id', $searchParam1)->orWhere('id', $searchParam2)
+                    ->first();
+                $challenge->status = 'playing';
+                $challenge->save();
+            }
 
             $oldScore = $gameMove->player0_score;
             // check if already won
@@ -65,7 +80,7 @@ class GameController extends Controller
                     $diff = $newDiff - (int)$originalDiff;
                     if($diff > 0)// case increment
                     {
-                        $gameMove->player0_fromPosition = $gameMove->player0_toPosition;
+                        $gameMove->{'player0_fromPosition'} = $gameMove->player0_toPosition;
                         $gameMove->player0_toPosition = ((int)$toPosition[0]+1).','. ($newScore%10);
                         $gameMove->player0_difference = $newDiff;
                         $gameMove->player0_moveType='increment';
@@ -79,14 +94,19 @@ class GameController extends Controller
                 $gameMove->player0_fromPosition = $gameMove->player0_toPosition;
                 $gameMove->player0_toPosition = $toPosition[0].','. ((int)$toPosition[1]+$diceValue);
                 $gameMove->player0_moveType='increment';
-                $gameMove->save();
+                //$gameMove->save();
             }
+            ($gameMove->whoseTurn === (int)$gameMove->player0_id)
+                ? $gameMove->whoseTurn = (int)$gameMove->player1_id
+                : $gameMove->whoseTurn = (int)$gameMove->player0_id;
 
             $gameMove->player0_score = $newScore;
             $gameMove->player0_diceValue = $diceValue;
+
             $gameMove->save();
             GameController::checkIfWinner($gameMove);
-            if((int)$gameMove->player0_score === 99) {return array('status'=> true, 'message'=>'You won the game',
+            if((int)$gameMove->player0_score === 99)
+            {return array('status'=> true, 'message'=>'You won the game',
                 'diceValue'=>$gameMove->player0_diceValue,
                 'data'=>$gameMove);}
 
@@ -103,8 +123,6 @@ class GameController extends Controller
      */
     public function show($id)
     {
-
-
         $gameMove = GameMove:: where('game_id', $id)->first();
         $toPosition = explode(',', $gameMove->player0_toPosition);
         return array('X'=> $toPosition[0], 'Y'=> $toPosition[1]);
@@ -153,13 +171,16 @@ class GameController extends Controller
 
         //return array('status' => true, 'data' => ['message' =>'Your request has been sent']);
 
-        if($id !== ''){
+        //decrypt id
+//        if($id !== ''){
 
             $user = auth()->user()->id;
-            $challenge_id  = $id . '|' . $user;
-            $challenge = Challenge:: find($challenge_id);
+            $searchParam1  = $id . '|' . $user;
+            $searchParam2  = $user . '|' . $id;
+            $challenge = Challenge::where('id',$searchParam1)->orWhere('id',$searchParam2)
+                ->first();
 
-            if($challenge == null) {
+            if($challenge === null) {
                 $challenge = new Challenge();
                 $receiver_id = $id;
                 $sender_id = auth()->user()->id;
@@ -172,12 +193,13 @@ class GameController extends Controller
                 $challenge->save();
                 $data = ['message' => 'Your request has been sent'];
                 return array('status' => true, 'data' => $data);
-            }else {
+            }else
+                {
                 return array('status' => false, 'messages' => 'something went wrong');
             }
-        } else{
-            return array('status' => false, 'messages' =>'something went wrong');
-        }
+//        } else{
+//            return array('status' => false, 'messages' =>'something went wrong');
+//        }
     }
 
     /**
@@ -188,52 +210,57 @@ class GameController extends Controller
         $SIZE = 50;
         $HEIGHT = 10;
         $WIDTH = 10;
-        if($id !== ''){
+        if($id !== '') {
             $user = auth()->user()->id;
-            $challenge_id = $id . '|' . $user;
-            $challenge = Challenge:: find($challenge_id);
-            $challenge->status = 'accepted';
-            $challenge->save();
-            $game = new Game();
-            $game->player1 = $id;
-            $game->player2 = $user;
-            $game->who_start = $id;
-            $game->board_dimension = $HEIGHT.'x'.$WIDTH.'x'.$SIZE;
-            $game->save();
-            // $data = ['status' => $challenge->status, 'message' => 'Game started',  'gameData' =>  $gameData ];
+            $searchParam1 = $id . '|' . $user;
+            $searchParam2 = $user . '|' . $id;
+            $challenge = Challenge::where('id', $searchParam1)->orWhere('id', $searchParam2)
+                ->first();
+//            $playersID = $challenge->sender . '|' . $challenge->receiver;
 
-            //Moves detail for the user who challenged
-            $p1 = 'player1';
-            $p2 = 'player2';
+            if ($challenge !== null) {
 
-            $move  = new GameMove();
-            $move->game_id = $game->id;
-            $move->whoseTurn = $id;
 
-            $move->player0_id =$id;
-            $move->player0_pieceId=$id;
-            $move->player0_diceValue=0;
-            $move->player0_fromPosition='0,0';
-            $move->player0_toPosition='0,0';
-            $move->player0_moveType='initial';
-            $move->player0_score=0;
-            $move->player0_difference=0;
 
-            $move->player1_id=$user;
-            $move->player1_pieceId=$user;
-            $move->player1_diceValue=0;
-            $move->player1_fromPosition='0,0';
-            $move->player1_toPosition='0,0';
-            $move->player1_moveType='initial';
-            $move->player1_score=0;
-            $move->player1_difference=0;
-            $move->save();
-            $toPosition = explode(',', $move->player0_toPosition);
-            $gameData = ['height' => $HEIGHT, 'width' => $WIDTH, 'size' => $SIZE, 'who_start' => $game->who_start, 'gameID' => $game->id,
-                'positionX'=> $toPosition[0], 'positionY' => $toPosition[1]];
+                $game = new Game();
+                $game->player1 = $id;
+                $game->player2 = $user;
+                $game->who_start = $id;
+                $game->board_dimension = $HEIGHT . 'x' . $WIDTH . 'x' . $SIZE;
+                $game->save();
 
-            $data = ['status' => $challenge->status, 'message' => 'Game started',  'gameData' =>  $gameData ];
-            return array('status'=> true, 'data' => $data);
+                $challenge->status = 'accepted';
+                $challenge->game_id = $game->id;
+                $challenge->save();
+                $move = new GameMove();
+                $move->game_id = $game->id;
+
+
+                $move->player0_id = $id;
+                $move->player0_pieceId = $id;
+                $move->player0_diceValue = 0;
+                $move->player0_fromPosition = '0,0';
+                $move->player0_toPosition = '0,0';
+                $move->player0_moveType = 'initial';
+                $move->player0_score = 0;
+                $move->player0_difference = 0;
+
+                $move->player1_id = $user;
+                $move->player1_pieceId = $user;
+                $move->player1_diceValue = 0;
+                $move->player1_fromPosition = '0,0';
+                $move->player1_toPosition = '0,0';
+                $move->player1_moveType = 'initial';
+                $move->player1_score = 0;
+                $move->player1_difference = 0;
+                $move->save();
+                $toPosition = explode(',', $move->player0_toPosition);
+                $gameData = ['height' => $HEIGHT, 'width' => $WIDTH, 'size' => $SIZE, 'who_start' => $game->who_start, 'gameID' => $game->id,
+                    'positionX' => $toPosition[0], 'positionY' => $toPosition[1]];
+
+                $data = ['status' => $challenge->status, 'message' => 'Game started', 'gameData' => $gameData];
+                return array('status' => true, 'data' => $data);
+            }
         }
     }
     /**
@@ -242,8 +269,10 @@ class GameController extends Controller
     public function getChallenges($id){
         if($id !== ''){
             $user = auth()->user()->id;
-            $challenge_id  = $id . '|' . $user;
-            $challenge = Challenge:: find($challenge_id);
+            $searchParam1 = $id . '|' . $user;
+            $searchParam2 = $user . '|' . $id;
+            $challenge = Challenge::where('id', $searchParam1)->orWhere('id', $searchParam2)->where('status','requested')
+                ->first();
 
             $data = ['challenge' => $challenge];
             return array('status'=> true, 'data' => $data);
@@ -253,6 +282,19 @@ class GameController extends Controller
     public  function checkIfWinner($gameMove){
         return 'Hello World'.$gameMove->player0_diceValue.'something';
 
-
+    }
+    public function getBoardData($id)
+    {
+        $user = auth()->user()->id;
+        $searchParam1 = $id . '|' . $user;
+        $searchParam2 = $user . '|' . $id;
+        $challenge = Challenge::where('id', $searchParam1)->orWhere('id', $searchParam2)
+            ->first();
+        $dimension = explode('x', $challenge->game->board_dimension);
+      //  return $dimension = $challenge->game->board_dimension;
+        $gameData = ['height' => $dimension[0], 'width' => $dimension[1], 'size' => $dimension[2], 'who_start' => $challenge->game->who_start,
+            'gameID' => $challenge->game_id, 'positionX' => 0, 'positionY' => 0];
+        $data = ['status' => $challenge->status, 'message' => 'Game started', 'gameData' => $gameData];
+        return array('status' => true, 'data' => $data);
     }
 }

@@ -15,4 +15,9 @@ class Challenge extends Model
         return $this->belongsTo('App\User','receiver');
     }
 
+    public function game()
+    {
+        return $this->belongsTo('App\Game', 'game_id');
+    }
+
 }

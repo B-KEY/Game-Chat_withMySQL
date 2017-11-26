@@ -11,7 +11,7 @@
 //		??
 //////////////////////////////////////////////////////
 //Cell constructor()
-function Cell(parent,id,size,row,col){
+function Cell(parent,id,size,row,col, num){
     this.parent=parent;
     this.id=id;
     this.size=size;
@@ -23,9 +23,14 @@ function Cell(parent,id,size,row,col){
     this.x=this.size*this.col;
     this.color= 'white';
     this.droppable=(((this.row+this.col)%2) == 0)? true:false;
-
+    this.text = num;
     this.object=this.create();
+    this.text = this.createText();
     this.parent.appendChild(this.object);
+    this.parent.appendChild(this.text);
+
+
+    // this.parent.appendChild(this.text);
     //this.myBBox = this.getMyBBox();
     console.log(this.myBBox);
 }
@@ -49,6 +54,14 @@ Cell.prototype={
         rectEle.setAttributeNS(null,'id',this.id);
         rectEle.onclick=function(){alert(this.id);};
         return rectEle;
+    },
+    createText: function(){
+        var textEle=document.createElementNS(game.svgns,'text');
+        textEle.setAttributeNS(null,'x',(this.x+20)+'px');
+        textEle.setAttributeNS(null,'y',(this.y+30)+'px');
+        textEle.textContent = this.text;
+        // textEle.onclick=function(){alert(this.id);};
+        return textEle;
     },
     //get my bbox
     getMyBBox:function(){

@@ -23,18 +23,21 @@
         div.tab {
             overflow: hidden;
             border: 1px solid #ccc;
-            background-color: #f1f1f1;
-            background-color: #4C516D;color:#fff;
+            border-radius: 5px;
+           // background-color: #f1f1f1;
+            background-color: #4C516D;
+            color:#fff;
+            padding: 14px 16px;
+            transition: 0.3s;
         }
 
         /* Style the buttons inside the tab */
-        div.tab button {
+        .inviteThisUser {
             background-color: inherit;
             float: right;
             border: none;
             outline: none;
             cursor: pointer;
-            padding: 14px 16px;
             transition: 0.3s;
         }
 
@@ -49,9 +52,7 @@
         }
         /*username style*/
         div.tab span {
-            font-size:18px;
-            position:absolute;
-            top: 10px;
+            font-size:20px;
             margin-left: 15px;
         }
 
@@ -118,8 +119,8 @@
         }
         #dice {font-size: 6rem;}
         .cells_white{
-            fill: white;
-            stroke-width: 1px; stroke: green;
+            fill: none;
+            stroke-width: 1px; stroke: #4C516D;
         }
     </style>
 </head>

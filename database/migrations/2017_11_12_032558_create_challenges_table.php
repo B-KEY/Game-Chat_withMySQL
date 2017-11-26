@@ -19,6 +19,7 @@ class CreateChallengesTable extends Migration
             $table->integer('receiver');
             $table->string('status');
             $table->boolean('active');
+            $table->integer('game_id');
             $table->timestamps();
         });
     }
