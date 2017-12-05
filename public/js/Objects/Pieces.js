@@ -7,21 +7,18 @@
 //////////////////////////////////////////////////////
 // Piece constructor
 // creates and initializes each Piece object
-function Piece(board,player,cellRow,cellCol,type,num){
+function Piece(board,player,cellRow,cellCol,type,color){
     this.board = board;			// piece needs to know the svg board object so that it can be attached to it.
     this.player = player;		// piece needs to know what player it belongs to.
     this.type = type;			// piece needs to know what type of piece it is. (put in so it could be something besides a checker!)
-    this.current_cell = game.boardArr[cellRow][cellCol];	// piece needs to know what its current cell/location is.
-    this.number = num;			// piece needs to know what number piece it is.
-    this.isCaptured = false;	// a boolean to know whether the piece has been captured yet or not.
-
+    this.current_cell = null    //game.boardArr[cellRow][cellCol];	// piece needs to know what its current cell/location is.
     //id looks like 'piece_0|3' - for player 0, the third piece
     this.id = "piece_" + this.player + "|" + this.number;	// the piece also needs to know what it's id is.
-    this.current_cell.isOccupied(this.id);			//set THIS board cell to occupied
-    this.x=this.current_cell.getCenterX();						// the piece needs to know what its x location value is.
-    this.y=this.current_cell.getCenterY();						// the piece needs to know what its y location value is as well.
-
+    this.x=cellRow//this.current_cell.getCenterX();						// the piece needs to know what its x location value is.
+    this.y=cellCol//this.current_cell.getCenterY();						// the piece needs to know what its y location value is as well.
     //this.object = eval("new " + type + "(this)");	//eval I wrote in class because I was lazy - better on next line
+    this.pieceColor = color;
+
     this.object=new window[type](this);				// based on the piece type, you need to create the more specific piece object (Checker, Pawn, Rook, etc.)
     this.piece = this.object.piece;					// a shortcut to the actual svg piece object
     this.setAtt("id",this.id);						// make sure the SVG object has the correct id value (make sure it can be dragged)
@@ -113,12 +110,25 @@ function SnakeLadder(parent) {
     this.newCord2 = this.parent.y;
 
     this.piece.setAttributeNS(null, 'transform', 'translate('+ this.newCord1+','+this.newCord2+')');
-    this.piece.setAttributeNS(null,"opacity",'0.5');
+    //this.piece.setAttributeNS(null,"opacity",'0.5');
 
     //create the svg snakeLadder piece.
-    var rect = document.createElementNS(game.svgns, 'rect');
-    rect.setAttributeNS(null, 'width', '20');
-    rect.setAttributeNS(null, 'height', '20');
-    this.piece.appendChild(rect);
+    var circ = document.createElementNS(game.svgns,"circle");
+    circ.setAttributeNS(null,"r",'20');
+    circ.setAttributeNS(null,"fill", this.parent.pieceColor);
+    console.log(this.parent.pieceColor);
+    circ.setAttributeNS(null,"opacity",'0.8');
+    this.piece.appendChild(circ);
+    var circ = document.createElementNS(game.svgns,"circle");
+    circ.setAttributeNS(null,"r",'10');
+    circ.setAttributeNS(null,"fill",'#D93636');
+    circ.setAttributeNS(null,"opacity",'0.4');
+    this.piece.appendChild(circ);
+    var circ = document.createElementNS(game.svgns,"circle");
+    circ.setAttributeNS(null,"r",'5');
+    circ.setAttributeNS(null,"fill",'#EA9090');
+    circ.setAttributeNS(null,"opacity",'0.2');
+    this.piece.appendChild(circ);
+
     return this;
 }

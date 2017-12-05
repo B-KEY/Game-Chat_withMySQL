@@ -1,38 +1,4 @@
 
-// function makeElements(tag, attrs, isSVG) {
-//     var elem;
-//     (isSVG) ? elem=  document.createElementNS('http://www.w3.org/2000/svg', tag)
-//         : elem = document.createElement(tag);
-//
-//     for (var k in attrs) {
-//         elem.setAttribute(k, attrs[k]);
-//     }
-//     return elem;
-// }
-//
-//
-// function createPlayground() {
-//     for (x = 0, i = 0; x < 500; x += 50) {
-//         for (y = 0; y < 500; y += 50) {
-//             var square = makeElements('rect', {
-//                 x: x,
-//                 y: y,
-//                 width: 100,
-//                 height: 100,
-//                 fill: 'rgb(' + Math.floor(Math.random()*255) +','+ Math.floor(Math.random()*255) +','+ Math.floor(Math.random()*255) +')'
-//             }, true);
-//             $('#gameBoard').append(square);
-//
-//             square.onmousedown = function () {
-//                 console.log($(this).attr('fill'));
-//             }
-//         }
-//         i++;
-//     }
-//}
-
-
-
 
 var rollTheDice = function() {
     var i,
@@ -48,66 +14,120 @@ var rollTheDice = function() {
 
 var game = {
     xhtmlns:"http://www.w3.org/1999/xhtml",
-        svgns:"http://www.w3.org/2000/svg",
-        BOARDX:40,				//starting pos of board
-        BOARDY:40,				//look above
-        boardArr:new Array(),		//2d array [row][col]
-        pieceArr:new Array(),		//2d array [player][piece] (player is either 0 or 1)
-        BOARDWIDTH:0,				//how many squares across
-        BOARDHEIGHT:0,			//how many squares down
-        CELLSIZE:0,
-        PLAYERONE: '',
-        PLAYERTWO: '',
-        INVITED_DIV: '<div id="invite_message_sent">' +
-        '<h3>Your request has been sent.</h3>' +
-        '<span>Game will begin once the user accept the request</span></div>',
-        PLAYGOUND_DIV:' <div id="playground" style="position:relative;border-right: 1px solid #4C516D;">' +
-        '<svg xmlns="http://www.w3.org/2000/svg" version="1.1"  width="600px" height="600px">' +
-        'Sorry! Your browser doesn\'t support SVG.' +
-        '</svg>' +
-        '<div style="position:absolute;top:30px;right:30px"><input type="button" value="Roll">' +
-        '<div id="dice"></div></div>' +
-        '</div>',
+    svgns:"http://www.w3.org/2000/svg",
+    BOARDX:10,				//starting pos of board
+    BOARDY:10,				//look above
+    boardArr:new Array(),		//2d array [row][col]
+    BOARDWIDTH:0,				//how many squares across
+    BOARDHEIGHT:0,			//how many squares down
+    CELLSIZE:0,
+    PLAYERONE: '',
+    PLAYERTWO: '',
 
-        init: function (res) {
+    drawGame: function (gameData){
         //create a parent to stick board in...
         var gEle = document.createElementNS(game.svgns, 'g');
         gEle.setAttributeNS(null, 'transform', 'translate(' + game.BOARDX + ',' + game.BOARDY + ')');
-        gEle.setAttributeNS(null, 'id', 'gId_' + res.data.gameData.gameID);
+        gEle.setAttributeNS(null, 'id', 'gId_' + gameData.game.id);
         //stick g on board
         document.getElementsByTagName('svg')[0].appendChild(gEle);
         //create the board...
-        game.BOARDHEIGHT = res.data.gameData.height;
-        game.BOARDWIDTH =  res.data.gameData.width;
-        game.CELLSIZE  = res.data.gameData.size;
-        console.log(game.BOARDWIDTH);
-            console.log(game.BOARDHEIGHT);
-         var num = 100;
+        game.BOARDHEIGHT = gameData.game.height;
+        game.BOARDWIDTH =  gameData.game.width;
+        game.CELLSIZE  = gameData.game.size;
+        var num = 100;
 
+        // This draws the board
         for (i = 0; i <game.BOARDWIDTH ; i++) {
             game.boardArr[i] = new Array();
             for (j = 0; j <game.BOARDHEIGHT; j++) {
-                game.boardArr[i][j] = new Cell(document.getElementById('gId_' + res.data.gameData.gameID), 'cell_' + j + i, game.CELLSIZE, i, j,num);
+                game.boardArr[i][j] = new Cell(document.getElementById('gId_' + gameData.game.id), 'cell_' + j + i, game.CELLSIZE, i, j,num);
                 (i%2===0)?num--:num++;
             }
             (i%2===0)?num++:num--;
             num-=10;
         }
-        PLAYERONE=new Piece('game_'+res.data.gameData.gameID,0,Number(res.data.gameData.positionX),Number(res.data.gameData.positionY),'SnakeLadder',0);
-        PLAYERTWO=new Piece('game_'+res.data.gameData.gameID,1,Number(res.data.gameData.positionX)+1,Number(res.data.gameData.positionY),'SnakeLadder',0);
-        $('#gameID').attr('value',res.data.gameData.gameID);
+
+        // this creates Pieces
+        PLAYERONE = new Piece(
+            gameData.game.id,
+            gameData.player0.id,
+            Number(gameData.player0.x),
+            Number(gameData.player0.y),
+            'SnakeLadder',
+            'red'
+        );
+
+        PLAYERTWO = new Piece(
+            gameData.game.id,
+            gameData.player1.id,
+            Number(gameData.player1.x),
+            Number(gameData.player1.y),
+            'SnakeLadder',
+            'green'
+        );
+        game.setLables(gameData.player0.name, gameData.player0.score, gameData.player1.name, gameData.player1.score);
+
+        $('#gameID').attr('value',gameData.game.id);
         document.querySelector('input[type=button]').addEventListener('click', function(){game.roll();});
-        },
+        game.drawSnakesAndLadder();
+    },
+
+        // init: function (res) {
+        // //create a parent to stick board in...
+        // var gEle = document.createElementNS(game.svgns, 'g');
+        // gEle.setAttributeNS(null, 'transform', 'translate(' + game.BOARDX + ',' + game.BOARDY + ')');
+        // gEle.setAttributeNS(null, 'id', 'gId_' + res.data.gameData.gameID);
+        // //stick g on board
+        // document.getElementsByTagName('svg')[0].appendChild(gEle);
+        // //create the board...
+        // game.BOARDHEIGHT = res.data.gameData.height;
+        // game.BOARDWIDTH =  res.data.gameData.width;
+        // game.CELLSIZE  = res.data.gameData.size;
+        // console.log(game.BOARDWIDTH);
+        //     console.log(game.BOARDHEIGHT);
+        //  var num = 100;
+        //
+        // for (i = 0; i <game.BOARDWIDTH ; i++) {
+        //     game.boardArr[i] = new Array();
+        //     for (j = 0; j <game.BOARDHEIGHT; j++) {
+        //         game.boardArr[i][j] = new Cell(document.getElementById('gId_' + res.data.gameData.gameID), 'cell_' + j + i, game.CELLSIZE, i, j,num);
+        //         (i%2===0)?num--:num++;
+        //     }
+        //     (i%2===0)?num++:num--;
+        //     num-=10;
+        // }
+        //
+        // PLAYERONE = new Piece(
+        //     res.data.gameData.gameID,res.data.gameData.player1,
+        //     Number(res.data.gameData.positionX),
+        //     Number(res.data.gameData.positionY),
+        //     'SnakeLadder'
+        // );
+        //
+        // PLAYERTWO = new Piece(
+        //     res.data.gameData.gameID,
+        //     res.data.gameData.player2,
+        //     Number(res.data.gameData.positionX),
+        //     Number(res.data.gameData.positionY),
+        //     'SnakeLadder'
+        // );
+        //
+        // $('#gameID').attr('value',res.data.gameData.gameID);
+        // document.querySelector('input[type=button]').addEventListener('click', function(){game.roll();});
+        // game.drawSnakesAndLadder();
+        // },
 
     roll: function(){
-        url = './games';
-        gameID= $('#gameID').attr('value');
-        manager.myXHR('POST', url, {gameID:gameID}).done(function(res){
+        console.log("Calling from roll");
+        var gameID= $('#gameID').attr('value');
+        var opponent_id = $("#receiver_id").attr('value');
+        manager.myXHR('POST', './games', {gameId:gameID,id:opponent_id}).done(function(res){
             var output ='';
-            var faceValue = res.diceValue;
+            var faceValue = res.data.gameData.diceValue;
             output += "&#x268" + faceValue + "; ";
             document.getElementById('dice').innerHTML = output;
-            game.playForUser(gameID);
+             game.playForUser(gameID);
         });
     },
     playForUser : function(gameID){
@@ -115,5 +135,47 @@ var game = {
         manager.myXHR('GET', url).done(function(res){
             util.setTransform('piece_0|0',game.boardArr[Number(res.X)][Number(res.Y)].getCenterX(),game.boardArr[Number(res.X)][Number(res.Y)].getCenterY());
         });
+    },
+
+
+    drawSnakesAndLadder: function() {
+
+        var gEle = document.createElementNS(game.svgns, 'g');
+        gEle.setAttributeNS(null, 'transform', 'translate(' + 40 + ',' + 45 + ')');
+        //stick g on board
+
+        var line1 = document.createElementNS(game.svgns,'line');
+        line1.setAttributeNS(null, 'x1', '20');
+        line1.setAttributeNS(null, 'x2', '58');
+        line1.setAttributeNS(null, 'y1', '75');
+        line1.setAttributeNS(null,'y2', '260');
+        line1.setAttributeNS(null, 'stroke',"#4C516D");
+        line1.setAttributeNS(null, 'stroke-width','4px');
+        line1.setAttributeNS(null, 'opacity', '0.5');
+
+        var line2 = document.createElementNS(game.svgns,'line');
+        line2.setAttributeNS(null, 'x1', '40');
+        line2.setAttributeNS(null, 'x2', '75');
+        line2.setAttributeNS(null, 'y1', '75');
+        line2.setAttributeNS(null,'y2', '258');
+        line2.setAttributeNS(null, 'stroke',"#4C516D");
+        line2.setAttributeNS(null, 'stroke-width','4px');
+        line2.setAttributeNS(null, 'opacity', '0.5');
+        gEle.appendChild(line1);
+        gEle.appendChild(line2);
+        document.getElementsByTagName('svg')[0].appendChild(gEle);
+    },
+    setLables: function(player0Name, player0Score, player1Name, player1Score) {
+        variable._player0Name$ = $('#player0Name'),
+        variable._player0Score$ = $('#player0Score'),
+        variable._player1Name$ = $('#player1Name'),
+        variable._player1Score$ = $('#player1Score'),
+
+        variable._player0Name$.text(player0Name.substr(0,3));
+        variable._player0Score$.text(' : ' + player0Score);
+        variable._player1Name$.text(player1Name.substr(0,3));
+        variable._player1Score$.text(' : '+ player1Score);
+
     }
+
 }

@@ -16,6 +16,9 @@ Route::get('/', 'PageController@index');
 Auth::routes();
 
 Route::get('/dashboard', 'DashboardController@index');
+Route::get('/dashboard/{type}/{id}', 'DashboardController@show');
+
+
 Route::resource('/messages','MessagesController');
 Route::get('/messages/getMore/{id}/{date}','MessagesController@getMore');
 Route::resource('/games','GameController');

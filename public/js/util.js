@@ -73,6 +73,16 @@ var util = {
 
     setTransform:function(id,x,y){
         document.getElementById(id).setAttributeNS(null,'transform','translate('+x+','+y+')');
+    },
+    maximizeGameWindow: function(){
+        $('#chat-section').removeClass('col-md-12');
+        $('#game-section').addClass('col-md-12');
+        $('#chat-section').addClass('invisible');
+    },
+    maximizeChatWindow: function(){
+        $('#game-section').removeClass('col-md-12');
+        $('#chat-section').addClass('col-md-12');
+        $('#game-section').addClass('invisible');
     }
 };
 

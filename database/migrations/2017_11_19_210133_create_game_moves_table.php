@@ -25,6 +25,7 @@ class CreateGameMovesTable extends Migration
             $table->string('player0_moveType');
             $table->string('player0_score');
             $table->string('player0_difference');
+            $table->string('player0_rolled');
 
             $table->string('player1_id');
             $table->string('player1_pieceId');
@@ -34,6 +35,7 @@ class CreateGameMovesTable extends Migration
             $table->string('player1_moveType');
             $table->string('player1_score');
             $table->string('player1_difference');
+            $table->string('player1_rolled');
 
             $table->timestamps();
 
