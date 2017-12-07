@@ -13,8 +13,8 @@ var variable = {
                     '<div id="dice"></div>' +
                     '<div><ul><li  style="list-style:none; font-size:20px; margin-top: 20px; color:red"><span id="player0Name">Something</span><span  id="player0Score"></span></li>' +
                     '<li  style="list-style:none;font-size:20px; margin-top: 20px; color:green"><span id="player1Name"></span><span id="player1Score"></span></li></ul></div></div>' +
+                    '<div id="error" class="alert alert-danger" style="display:none"></div>'+
                     '</div>',
-
     _invitedDiv:    '<div id="invite_message_sent">' +
                     '<h3>Your request has been sent.</h3>' +
                     '<span>Game will begin once the user accept the request</span></div>',
@@ -25,12 +25,12 @@ var variable = {
     _chatSection$ : $('#chat-section'),
     _userName$ : $('#userName'),
     _charMessages$: $('.chatMessage'),
-    //_receiverId$ : $('#receiver_id'),
+    _receiverId$ : $('#receiver_id'),
     _player0Name$: '',
     _player0Score$: '',
     _player1Name$: '',
     _player1Score$: '',
-
+    _thisUser$ : $('#this_user'),
 
 }
 

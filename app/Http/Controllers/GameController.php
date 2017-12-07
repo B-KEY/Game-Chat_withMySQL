@@ -37,7 +37,7 @@ class GameController extends Controller
     public function store(Request $request)
     {
         // check if the game_id exist
-        if($request->gameId && $request->id) {
+        if($request->gameId  && $request->id) {
 
         }
 
@@ -49,7 +49,15 @@ class GameController extends Controller
             $data = ['messageData' => [], 'gameData' => []];
             $challengeStatus = null;
             $encryptedID = explode('_', base64_decode($request->gameId));
-            $gameId = substr($encryptedID[3], 1);;
+            $gameId = substr($encryptedID[3], 1);
+
+            $snake = array(0 => 95, 1 => 98, 3 => 87, 4 => 54, 5 => 64 , 6 => 17);
+            $snakeByteDiff = [ 20, 20, 63, 20, 4, 10];
+
+
+            $ladder = array(0 => 4, 1 => 20, 3 => 28, 4 => 40, 5 => 63, 6 => 71);
+            $ladderClimDiff = [10, 18, 56, 19, 18, 20];
+
 
             //roll the dice
             $diceValue = rand(1,6);
@@ -95,6 +103,17 @@ class GameController extends Controller
 
                     $newScore = $diceValue + (int)$oldScore; // this will give new score.
 
+                    // test if this is a snake byte or not
+                    $snakeIndex = array_search($newScore, $snakeByteDiff);
+                    $ladderIndex = array_search($newScore, $ladderClimDiff);
+                    if($snakeIndex){
+                        $newScore = $newScore - $snakeByteDiff[$snakeIndex];
+                    }
+
+                    if($ladderIndex) {
+                        $newScore = $newScore + $snakeByteDiff[$snakeIndex];
+                    }
+
                     if($newScore > 99) {  //check if new dice value is making the more than 100;
                         $gameMove->{$player . '_rolled'} = 'yes';
                         $gameMove->{ $opponentId . '_rolled'} = 'no';
@@ -109,7 +128,9 @@ class GameController extends Controller
                                 'data' => $data,
                                 'challengeStatus' => $challengeStatus
                         );
-                    } else { // this is an assurance that the move the score now can be saved in the data base.
+                    } else { // this is an assurance that the move and score now can be saved in the data base.
+
+
                             $originalDiff = $gameMove->{$player . '_difference'};
                             if( $gameMove->{$player . '_toPosition'} === '50,550' || $gameMove->{$player . '_toPosition'} === '150,550' ) {
                                 // this check if the it is the first move
@@ -117,23 +138,43 @@ class GameController extends Controller
                             }
                             $newDiff = intdiv($newScore, 10);
                             $toPosition = explode(',', $gameMove->{$player . '_toPosition'});
-                            if ((int)$originalDiff !== $newDiff) {
+                            $gameMove->{$player . '_fromPosition'} = $gameMove->{$player . '_toPosition'};
+                            if ((int)$originalDiff !== $newDiff ){
                                 $diff = $newDiff - (int)$originalDiff;
-                                if ($diff > 0)// case increment
+                                if((($newScore % 10) === 0))
                                 {
-                                    $gameMove->{$player . '_toPosition'} = ((int)$toPosition[0] + 1) . ',' . ($newScore % 10);
+                                    ($newDiff % 2 == 0)
+                                        ?$gameMove->{$player . '_toPosition'} = /*( (int)$toPosition[0] + 1)*/(int)$originalDiff  . ',0'
+                                        :$gameMove->{$player . '_toPosition'} = /*( (int)$toPosition[0] + 1)*/(int)$originalDiff  . ',9';
+                                    $gameMove->{$player . '_moveType'} = '10changed';
+                                }else{
+
+                                    ($diff > 0)?$gameMove->{$player . '_moveType'} = 'increment':$gameMove->{$player . '_moveType'} = 'decrement';
+
+                                    // take care of the end column
+                                    ((int)$toPosition[1] === 0 || (int)$toPosition[1] === 9) ? $diceValue = $diceValue -1: $diceValue;
+
+                                    //decide to move left or right
+                                    ($newDiff % 2 == 0)
+                                        ?$gameMove->{$player . '_toPosition'} = /*( (int)$toPosition[0] + 1)*/$newDiff  . ',' . (($newScore % 10)-1)
+                                        :$gameMove->{$player . '_toPosition'} = /*( (int)$toPosition[0] + 1)*/$newDiff  . ',' . (10-($newScore % 10));
+
+
                                     $gameMove->{$player . '_difference'} = $newDiff;
-                                    $gameMove->{$player . '_moveType'} = 'increment';
-                                } else {
-                                    $gameMove->{$player . '_toPosition'} = ((int)$toPosition[0] - 1) . ',' . ($newScore % 10);
-                                    $gameMove->{$player . '_difference'} = $newDiff;
-                                    $gameMove->{$player . '_moveType'} = 'decrement';
                                 }
                             } else {
-                                $gameMove->{$player . '_fromPosition'} = $gameMove->{$player . '_toPosition'};
-                                $gameMove->{$player . '_toPosition'} = $toPosition[0] . ',' . ((int)$toPosition[1] + $diceValue);
+
+                                // take care of the end column
+                                ((int)$toPosition[1] == 0 || (int)$toPosition[1] == 9) ? $diceValue = $diceValue - 1: $diceValue;
+
+
+                                //decide to move left or right
+                                ($newDiff % 2 == 0)
+                                    ?$gameMove->{$player . '_toPosition'} = $toPosition[0] . ',' . ((int)$toPosition[1] + $diceValue)
+                                    :$gameMove->{$player . '_toPosition'} = $toPosition[0] . ',' . ((int)$toPosition[1] - $diceValue) ;
+
+
                                 $gameMove->{$player . '_moveType'} = 'increment';
-                                //$gameMove->save();
                             }
                             $gameMove->{$player . '_score'} = $newScore;
                             $gameMove->{$player . '_diceValue'} = $diceValue;

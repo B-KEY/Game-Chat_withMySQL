@@ -83,6 +83,16 @@ var util = {
         $('#game-section').removeClass('col-md-12');
         $('#chat-section').addClass('col-md-12');
         $('#game-section').addClass('invisible');
+    },
+
+    warning:function(){
+        console.log('This is an error');
+        if(document.getElementById('error').getAttributeNS(null,'display') === 'none'){
+            document.getElementById('error').setAttributeNS(null,'display','inline');
+            setTimeout(util.warning,2000);
+        }else{
+            document.getElementById('error').setAttributeNS(null,'display','none');
+        }
     }
 };
 

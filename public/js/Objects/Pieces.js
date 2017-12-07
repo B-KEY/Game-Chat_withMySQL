@@ -8,7 +8,7 @@
 // Piece constructor
 // creates and initializes each Piece object
 function Piece(board,player,cellRow,cellCol,type,color){
-    this.board = board;			// piece needs to know the svg board object so that it can be attached to it.
+    /*this.board = board;			// piece needs to know the svg board object so that it can be attached to it.
     this.player = player;		// piece needs to know what player it belongs to.
     this.type = type;			// piece needs to know what type of piece it is. (put in so it could be something besides a checker!)
     this.current_cell = null    //game.boardArr[cellRow][cellCol];	// piece needs to know what its current cell/location is.
@@ -27,6 +27,40 @@ function Piece(board,player,cellRow,cellCol,type,color){
     }else{
         this.piece.addEventListener('mousedown',util.nypwarning,false);	//tell the user that isn't his piece!
     }
+    //this.piece.addEventListener('mousedown',function(){ document.getElementById('output2').firstChild.nodeValue=this.id;},false); 	//for testing purposes only...
+    document.getElementsByTagName('svg')[0].appendChild(this.piece);
+
+    // return this piece object
+    return this;*/
+
+
+    this.board = board;			// piece needs to know the svg board object so that it can be attached to it.
+    this.player = player;		// piece needs to know what player it belongs to.
+    this.type = type; // piece needs to know what type of piece it is. (put in so it could be something besides a checker!)
+    if(cellRow > 20){ this.current_cell = game.boardArr[0][0];	// piece needs to know what its current cell/location is.
+    }else{
+        this.current_cell = game.boardArr[cellRow][cellCol];	// piece needs to know what its current cell/location is.
+    }
+    //this.number = num;			// piece needs to know what number piece it is.
+    //this.isCaptured = false;	// a boolean to know whether the piece has been captured yet or not.
+    this.pieceColor = color;
+    //id looks like 'piece_0|3' - for player 0, the third piece
+    this.id = "piece_" + this.player;	// the piece also needs to know what it's id is.
+    this.current_cell.isOccupied(this.id);			//set THIS board cell to occupied
+    this.x= (cellRow>20) ? cellRow : this.current_cell.getCenterX();						// the piece needs to know what its x location value is.
+    this.y= (cellRow>20) ? cellCol : this.current_cell.getCenterY();						// the piece needs to know what its y location value is as well.
+
+    //this.object = eval("new " + type + "(this)");	//eval I wrote in class because I was lazy - better on next line
+    this.object=new window[type](this);				// based on the piece type, you need to create the more specific piece object (Checker, Pawn, Rook, etc.)
+    this.piece = this.object.piece;					// a shortcut to the actual svg piece object
+    this.setAtt("id",this.id);						// make sure the SVG object has the correct id value (make sure it can be dragged)
+
+    //console.log(game.THISPLAYER, this.player);
+    //  if(this.player === game.THISPLAYER){
+    //      this.piece.addEventListener('mousedown',function(){ drag.setMove(this.id);},false);	// add a mousedown event listener to your piece so that it can be dragged.
+    //  }else{
+    //      this.piece.addEventListener('mousedown',util.warning,false);	//tell the user that isn't his piece!
+    //  }
     //this.piece.addEventListener('mousedown',function(){ document.getElementById('output2').firstChild.nodeValue=this.id;},false); 	//for testing purposes only...
     document.getElementsByTagName('svg')[0].appendChild(this.piece);
 
@@ -129,6 +163,5 @@ function SnakeLadder(parent) {
     circ.setAttributeNS(null,"fill",'#EA9090');
     circ.setAttributeNS(null,"opacity",'0.2');
     this.piece.appendChild(circ);
-
     return this;
 }

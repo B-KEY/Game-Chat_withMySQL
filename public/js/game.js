@@ -23,6 +23,7 @@ var game = {
     CELLSIZE:0,
     PLAYERONE: '',
     PLAYERTWO: '',
+    THISPLAYER: '',
 
     drawGame: function (gameData){
         //create a parent to stick board in...
@@ -35,19 +36,30 @@ var game = {
         game.BOARDHEIGHT = gameData.game.height;
         game.BOARDWIDTH =  gameData.game.width;
         game.CELLSIZE  = gameData.game.size;
-        var num = 100;
+        var num = 1;
 
         // This draws the board
-        for (i = 0; i <game.BOARDWIDTH ; i++) {
-            game.boardArr[i] = new Array();
-            for (j = 0; j <game.BOARDHEIGHT; j++) {
-                game.boardArr[i][j] = new Cell(document.getElementById('gId_' + gameData.game.id), 'cell_' + j + i, game.CELLSIZE, i, j,num);
-                (i%2===0)?num--:num++;
+        for (i = 9,x = 0; i >=0  ; i--, x++) {
+            game.boardArr[x] = new Array();
+            for (var j = 0; j <game.BOARDHEIGHT; j++) {
+                game.boardArr[x][j] = new Cell(document.getElementById('gId_' + gameData.game.id), 'cell_' + j + i, game.CELLSIZE, i, j,num);
+                (x%2===0)?num++:num--;
             }
-            (i%2===0)?num++:num--;
-            num-=10;
+            (x%2===0)?num--:num++;
+            num+=10;
         }
 
+        console.log('receiver_id :' + variable._receiverId$.attr('value'));
+        console.log('player0 id :' + gameData.player0.id);
+        console.log('player1 id' + gameData.player1.id);
+
+        // if(variable._receiverId$.attr('value') === gameData.player0.id){
+        //     variable._thisUser$.attr('value', gameData.player1.id);
+        // }else{
+        //     variable._thisUser$.attr('value', gameData.player0.id);
+        //
+        // }
+        // game.THISPLAYER = variable._thisUser$.attr('value');
         // this creates Pieces
         PLAYERONE = new Piece(
             gameData.game.id,
@@ -66,6 +78,8 @@ var game = {
             'SnakeLadder',
             'green'
         );
+
+
         game.setLables(gameData.player0.name, gameData.player0.score, gameData.player1.name, gameData.player1.score);
 
         $('#gameID').attr('value',gameData.game.id);
@@ -172,9 +186,9 @@ var game = {
         variable._player1Score$ = $('#player1Score'),
 
         variable._player0Name$.text(player0Name.substr(0,3));
-        variable._player0Score$.text(' : ' + player0Score);
+        variable._player0Score$.text(' : ' + (Number(player0Score)));
         variable._player1Name$.text(player1Name.substr(0,3));
-        variable._player1Score$.text(' : '+ player1Score);
+        variable._player1Score$.text(' : '+ (Number(player1Score)));
 
     }
 

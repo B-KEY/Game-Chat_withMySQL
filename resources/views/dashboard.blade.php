@@ -69,6 +69,7 @@
 
                     </div>
                     <input id="receiver_id" type="hidden" >
+                    <input id="this_user"  type="hidden">
                     <input id="lst_saved" type = "hidden">
                     <input id="gameID" type="hidden">
 
