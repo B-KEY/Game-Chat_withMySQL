@@ -204,4 +204,15 @@ class DashboardController extends Controller
 
     }
 
+    public function returnChallenge($player0, $player2){
+        //for challenges
+        $searchParam1  = $player0 . '|' . $player2;
+        $searchParam2  = $player2 . '|' . $player0;
+
+        return  Challenge::where('id',$searchParam1)
+            ->orWhere('id',$searchParam2)
+            ->orderBy('created_at','desc')
+            ->first();
+    }
+
 }
