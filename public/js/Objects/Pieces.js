@@ -55,12 +55,13 @@ function Piece(board,player,cellRow,cellCol,type,color){
     this.piece = this.object.piece;					// a shortcut to the actual svg piece object
     this.setAtt("id",this.id);						// make sure the SVG object has the correct id value (make sure it can be dragged)
 
-    //console.log(game.THISPLAYER, this.player);
-    //  if(this.player === game.THISPLAYER){
-    //      this.piece.addEventListener('mousedown',function(){ drag.setMove(this.id);},false);	// add a mousedown event listener to your piece so that it can be dragged.
-    //  }else{
-    //      this.piece.addEventListener('mousedown',util.warning,false);	//tell the user that isn't his piece!
-    //  }
+
+    console.log("this player id :" + this.player, game.thisPlayer.id);
+    if(this.player == game.thisPlayer.id){
+        this.piece.addEventListener('mousedown',function(){ drag.setMove(this.id);},false);	// add a mousedown event listener to your piece so that it can be dragged.
+      }else{
+          this.piece.addEventListener('mousedown',util.warning,false);	//tell the user that isn't his piece!
+    }
     //this.piece.addEventListener('mousedown',function(){ document.getElementById('output2').firstChild.nodeValue=this.id;},false); 	//for testing purposes only...
     document.getElementsByTagName('svg')[0].appendChild(this.piece);
 
@@ -72,12 +73,13 @@ Piece.prototype={
     //change cell (used to move the piece to a new cell and clear the old)
     changeCell:function(newCell,row,col){
         this.current_cell.notOccupied();
-        document.getElementById('output').firstChild.nodeValue='dropped cell: '+newCell;
+        // document.getElementById('output').firstChild.nodeValue='dropped cell: '+newCell;
         this.current_cell = game.boardArr[row][col];
         this.current_cell.isOccupied(this.id);
     },
     //when called, will remove the piece from the document and then re-append it (put it on top!)
     putOnTop:function(){
+        console.log('I got called.', this.piece);
         document.getElementsByTagName('svg')[0].removeChild(this.piece);
         document.getElementsByTagName('svg')[0].appendChild(this.piece);
     },

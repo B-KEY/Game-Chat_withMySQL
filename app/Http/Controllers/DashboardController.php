@@ -12,6 +12,11 @@ use App\GameMove;
 
 class DashboardController extends Controller
 {
+
+    private $error = 'Something went wrong';
+    private $success = 'Retrieval was successful';
+
+
     /**
      * Create a new controller instance.
      *
@@ -39,7 +44,7 @@ class DashboardController extends Controller
             /**************************************************************************************************************************************/
             // getting all the challenges and preparing array
 
-            $challenge = Challenge::where('receiver', $user_id)->get();
+            $challenge = Challenge::where('receiver', $user_id)->where('status','requested')->get();
 
             foreach($challenge as $c) {
                 $challenges[] = ['challenger_id' => $c->sender, 'challenger' => $c->haveChallenged->name];
@@ -52,7 +57,7 @@ class DashboardController extends Controller
             $users = User::where('id','!=',$user_id)->get();
 
             foreach($users as $user) {
-                $userArray[] = ['id' => base64_encode(rand(0,9) . '_player_' . rand(0,9) . '_' . rand(0,9).$user->id . '_'. rand(0,9)),
+                $userArray[] = ['id' => /*base64_encode(rand(0,9) . '_player_' . rand(0,9) . '_' . rand(0,9).*/$user->id/* . '_'. rand(0,9))*/,
                     'image_url' => $user->image_url, 'name' => $user->name];
             }
             /**************************************************************************************************************************************/
@@ -62,7 +67,7 @@ class DashboardController extends Controller
 
             $groups = Group::all();
             foreach($groups as $group) {
-                $groupArray[] = ['id' => base64_encode(rand(0,9) . '_group_' . rand(0,9) . '_' . rand(0,9).$group->id . '_'. rand(0,9)),
+                $groupArray[] = ['id' => /*base64_encode(rand(0,9) . '_group_' . rand(0,9) . '_' . rand(0,9).*/$group->id/* . '_'. rand(0,9))*/,
                     'image_url' => $group->image_url, 'name' => $group->name];
             }
             /**************************************************************************************************************************************/
@@ -83,10 +88,9 @@ class DashboardController extends Controller
             $challengeStatus = null;
             $messageData = [];
             $data = [];
-            $error = "Something went wrong";
             if (($type === 'group') || ($type == 'individual')) {
-                $encryptedID = explode('_', base64_decode($id));
-                $id = substr($encryptedID[3], 1);
+                /*$encryptedID = explode('_', base64_decode($id));
+                $id = substr($encryptedID[3], 1);*/
                 //return $id;
 
                 $user_id1 = $id;
@@ -116,7 +120,7 @@ class DashboardController extends Controller
                 /**************************************************************************************************************************************/
                 // Check if the selected user is a individual user. If yes check if this user is already playing/challenged selected user.
                 if ($type === 'individual') {
-                    $challenge = Challenge::where('id', $searchParam1)->orWhere('id', $searchParam2)
+                    $challenge = Challenge::where('id', $searchParam1)->orWhere('id', $searchParam2)->where('status','!=','finished')
                         ->first();
                     $gameData = [];
                     if ($challenge) {
@@ -142,14 +146,14 @@ class DashboardController extends Controller
 
                             $gameData = [
                                 'game'=> [
-                                            'id' => base64_encode(rand(0,9) . '_game_' . rand(0,9) . '_' . rand(0,9).$gameMove->game_id . '_'. rand(0,9)),
+                                            'id' => /*base64_encode(rand(0,9) . '_game_' . rand(0,9) . '_' . rand(0,9).*/$gameMove->game_id/* . '_'. rand(0,9))*/,
                                             'turn' => $gameMove->whoseTurn,
                                             'height' => $HEIGHT,
                                             'width' => $WIDTH,
                                             'size' => $SIZE
                                 ],
                                 'player0' => [
-                                            'id' =>  base64_encode(rand(0,9) . '_player_' . rand(0,9) . '_' . rand(0,9).$gameMove->player0_id . '_'. rand(0,9)),
+                                            'id' =>  /*base64_encode(rand(0,9) . '_player_' . rand(0,9) . '_' . rand(0,9).*/$gameMove->player0_id/* . '_'. rand(0,9))*/,
                                             'piece_id' => $gameMove->player0_pieceId,
                                             'x' => $player0PositionX,
                                             'y' => $player0PositionY,
@@ -158,7 +162,7 @@ class DashboardController extends Controller
                                             'name' => $player0Name
                                 ],
                                 'player1' => [
-                                            'id' =>  base64_encode(rand(0,9) . '_player_' . rand(0,9) . '_' . rand(0,9).$gameMove->player1_id . '_'. rand(0,9)),
+                                            'id' =>  /*base64_encode(rand(0,9) . '_player_' . rand(0,9) . '_' . rand(0,9).*/$gameMove->player1_id/* . '_'. rand(0,9))*/,
                                             'piece_id' => $gameMove->player1_pieceId,
                                             'x' => $player1PositionX,
                                             'y' => $player1PositionY,
@@ -170,21 +174,34 @@ class DashboardController extends Controller
                         }
                     }
                     $data = ['messageData' => $messageData, 'gameData' => $gameData];
-                    return array('status' => true, 'message' => 'Retrieval was successful', 'data' => $data, 'challengeStatus' => $challengeStatus);
+                    return $this -> sendResponse(true, $this->success, $data, $challengeStatus);
                 }
                 /**************************************************************************************************************************************/
 
                 //return data for group users
-                return array('status' => true, 'message' => 'Retrieval was successful', 'data' => $data, 'challengeStatus' => $challengeStatus);
+                return $this -> sendResponse(true, $this->success, $data, $challengeStatus);
 
             } else {
-                return array('status' => false, 'messages' => $error, 'data' => null, 'challengeData' => $challengeStatus);
+                return $this -> sendResponse(false, $this->error, null, $challengeStatus);
             }
         } catch (\Illuminate\Database\QueryException $ex) {
-            return array('status' => false, 'messages' => $error, 'data' => null, 'challengeData' => $challengeStatus);
+            return $this -> sendResponse(false, $this->error, null, $challengeStatus);
         } catch(Exception $ex) {
-            return array('status' => false, 'messages' => $error, 'data' => null, 'challengeData' => $challengeStatus);
+            return $this -> sendResponse(false, $this->error, null, $challengeStatus);
         }
+    }
+
+
+
+    public function sendResponse($status, $message, $data, $challengeStatus){
+
+        return array(
+            'status' => $status,
+            'message' => $message,
+            'data' => $data,
+            'challengeStatus' => $challengeStatus
+        );
+
     }
 
 }

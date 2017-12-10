@@ -21,10 +21,22 @@ var game = {
     BOARDWIDTH:0,				//how many squares across
     BOARDHEIGHT:0,			//how many squares down
     CELLSIZE:0,
-    PLAYERONE: '',
-    PLAYERTWO: '',
-    THISPLAYER: '',
-
+    whoseTurn: '',
+    thisPlayer: {
+      id: '',
+      score: '',
+      rolled: '',
+      piece:'',
+      name:''
+    },
+    opponent: {
+        id: '',
+        score: '',
+        rolled: '',
+        piece:'',
+        name:''
+    },
+    id:'',
     drawGame: function (gameData){
         //create a parent to stick board in...
         var gEle = document.createElementNS(game.svgns, 'g');
@@ -36,13 +48,14 @@ var game = {
         game.BOARDHEIGHT = gameData.game.height;
         game.BOARDWIDTH =  gameData.game.width;
         game.CELLSIZE  = gameData.game.size;
+        game.whoseTurn = gameData.game.whoseTurn;
         var num = 1;
 
         // This draws the board
         for (i = 9,x = 0; i >=0  ; i--, x++) {
             game.boardArr[x] = new Array();
             for (var j = 0; j <game.BOARDHEIGHT; j++) {
-                game.boardArr[x][j] = new Cell(document.getElementById('gId_' + gameData.game.id), 'cell_' + j + i, game.CELLSIZE, i, j,num);
+                game.boardArr[x][((num-1)%10)] = new Cell(document.getElementById('gId_' + gameData.game.id), 'cell_' + x + ((num-1)%10), game.CELLSIZE, i, j,num);
                 (x%2===0)?num++:num--;
             }
             (x%2===0)?num--:num++;
@@ -52,39 +65,58 @@ var game = {
         console.log('receiver_id :' + variable._receiverId$.attr('value'));
         console.log('player0 id :' + gameData.player0.id);
         console.log('player1 id' + gameData.player1.id);
+        game.id = gameData.game.id;
+        if(variable._receiverId$.attr('value') === gameData.player0.id){
+            variable._thisPlayer = 'player1';
+            variable._opponent = 'player0';
 
-        // if(variable._receiverId$.attr('value') === gameData.player0.id){
-        //     variable._thisUser$.attr('value', gameData.player1.id);
-        // }else{
-        //     variable._thisUser$.attr('value', gameData.player0.id);
-        //
-        // }
-        // game.THISPLAYER = variable._thisUser$.attr('value');
-        // this creates Pieces
-        PLAYERONE = new Piece(
-            gameData.game.id,
-            gameData.player0.id,
-            Number(gameData.player0.x),
-            Number(gameData.player0.y),
+        }else{
+            variable._thisPlayer = 'player0';
+            variable._opponent = 'player1';
+        }
+
+        //assign opponent
+        game.opponent.id = gameData[variable._opponent].id;
+        game.opponent.score = gameData[variable._opponent].score;
+        game.opponent.rolled = gameData[variable._opponent].rolled;
+        game.opponent.name = gameData[variable._opponent].name;
+        game.opponent.piece = new Piece(
+            'game' + gameData.game.id,
+            game.opponent.id,
+            gameData[variable._opponent].x,
+            gameData[variable._opponent].y,
             'SnakeLadder',
-            'red'
+            'green'  // this needs to come from database
+        );
+        // assign this player
+        game.thisPlayer.id  = gameData[variable._thisPlayer].id;
+        game.thisPlayer.score = gameData[variable._thisPlayer].score;
+        game.thisPlayer.rolled = gameData[variable._thisPlayer].rolled;
+        game.thisPlayer.name = gameData[variable._thisPlayer].name;
+        game.thisPlayer.piece = new Piece(
+            'game_' + gameData.game.id,
+            game.thisPlayer.id,
+            gameData[variable._thisPlayer].x,
+            gameData[variable._thisPlayer].y,
+            'SnakeLadder',
+            'red'   // needs to come from database;
         );
 
-        PLAYERTWO = new Piece(
-            gameData.game.id,
-            gameData.player1.id,
-            Number(gameData.player1.x),
-            Number(gameData.player1.y),
-            'SnakeLadder',
-            'green'
-        );
+        game.setLables(
+            gameData[variable._thisPlayer].name,
+            gameData[variable._thisPlayer].score,
+            gameData[variable._opponent].name,
+            gameData[variable._opponent].score);
 
-
-        game.setLables(gameData.player0.name, gameData.player0.score, gameData.player1.name, gameData.player1.score);
-
-        $('#gameID').attr('value',gameData.game.id);
+        variable._gameId$.attr('value',gameData.game.id);
         document.querySelector('input[type=button]').addEventListener('click', function(){game.roll();});
         game.drawSnakesAndLadder();
+        //put the drop code on the document...
+        document.getElementsByTagName('svg')[0].addEventListener('mouseup',drag.releaseMove,false);
+        //put the go() method on the svg doc.
+        document.getElementsByTagName('svg')[0].addEventListener('mousemove',drag.go,false);
+
+
     },
 
         // init: function (res) {
@@ -133,17 +165,21 @@ var game = {
         // },
 
     roll: function(){
-        console.log("Calling from roll");
-        var gameID= $('#gameID').attr('value');
-        var opponent_id = $("#receiver_id").attr('value');
-        manager.myXHR('POST', './games', {gameId:gameID,id:opponent_id}).done(function(res){
-            var output ='';
-            var faceValue = res.data.gameData.diceValue;
-            output += "&#x268" + faceValue + "; ";
-            document.getElementById('dice').innerHTML = output;
-             game.playForUser(gameID);
-        });
-    },
+        //var gameID = variable._gameId.attr('value');
+        //var opponent_id = $("#receiver_id").attr('value');
+        manager.myXHR (
+            'POST',
+            './games',
+            { gameId:variable._gameId$.attr('value'), id:variable._receiverId$.attr('value')}
+            ).done(function(res){
+                var output ='';
+                var faceValue = res.data.gameData.diceValue;
+                output += "&#x268" + faceValue + "; ";
+                document.getElementById('dice').innerHTML = output;
+                game.playForUser(gameID);
+            });
+        },
+
     playForUser : function(gameID){
         url = './games/'+ gameID;
         manager.myXHR('GET', url).done(function(res){
@@ -190,6 +226,115 @@ var game = {
         variable._player1Name$.text(player1Name.substr(0,3));
         variable._player1Score$.text(' : '+ (Number(player1Score)));
 
+    }
+
+}
+
+
+var drag={
+    //the problem of dragging....
+    myX:'',						//hold my last pos.
+    myY:'',					//hold my last pos.
+    mover:'',					//hold the id of the thing I'm moving
+    ////setMove/////
+    //	set the id of the thing I'm moving...
+    ////////////////
+    setMove:function(which){
+        drag.mover = which;
+        console.log("piece Id: "+ which);
+
+
+
+        drag.myX=game.thisPlayer.piece.x;
+        drag.myY=game.thisPlayer.piece.y;
+        console.log("piece location: ", drag.myX, drag.myY);
+        game.thisPlayer.piece.putOnTop(which);
+        //get the object then re-append it to the document so it is on top!
+        /*util.getPiece(which).putOnTop(which);*/
+    },
+    releaseMove:function(evt){
+        if(drag.mover != ''){
+            //is it YOUR turn?
+            //if(game.whoseTurn == game.thisPlayer.id){
+                var hit = drag.checkHit(evt.layerX,evt.layerY,drag.mover);
+           // }else{
+             //   var hit=false;
+                //util.nytwarning();
+           // }
+
+            if(hit==true){
+                //I'm on the square...
+                //send the move to the server!!!
+                //ajax.changeServerTurnAjax("changeTurn",38);
+                // url = './game/change';
+                // manager.myXHR('POST', url,{gameId: variable._gameId$.attr('value'), id: variable._receiverId$.attr('value')}).done(function(res){
+                //     console.log('This piece id', game.boardArr[Number(res.data.gameData.player.x)][Number(res.data.gameData.player.y)].getCenterX());
+                //     util.setTransform(
+                //         game.thisPlayer.piece.id,
+                //         game.boardArr[Number(res.data.gameData.player.x)][Number(res.data.gameData.player.y)].getCenterX(),
+                //         game.boardArr[Number(res.data.gameData.player.x)][Number(res.data.gameData.player.y)].getCenterY()
+                //     );
+                //     // util.setTransform('piece_0|0',game.boardArr[Number(res.X)][Number(res.Y)].getCenterX(),game.boardArr[Number(res.X)][Number(res.Y)].getCenterY());
+                // });
+
+            }else{
+                url = './game/change';
+                manager.myXHR('POST', url,{gameId: variable._gameId$.attr('value'), id: variable._receiverId$.attr('value')}).done(function(res){
+                    console.log('This piece id', game.boardArr[Number(res.data.gameData.player.x)][Number(res.data.gameData.player.y)].getCenterX());
+                    util.setTransform(
+                        game.thisPlayer.piece.id,
+                        game.boardArr[Number(res.data.gameData.player.x)][Number(res.data.gameData.player.y)].getCenterX(),
+                        game.boardArr[Number(res.data.gameData.player.x)][Number(res.data.gameData.player.y)].getCenterY()
+                        );
+                   // util.setTransform('piece_0|0',game.boardArr[Number(res.X)][Number(res.Y)].getCenterX(),game.boardArr[Number(res.X)][Number(res.Y)].getCenterY());
+                    game.thisPlayer.piece.changeCell(
+                        game.boardArr[Number(res.data.gameData.player.x)][Number(res.data.gameData.player.y)].id,
+                        Number(res.data.gameData.player.x),
+                        Number(res.data.gameData.player.y)
+                    );
+                });
+                //move back
+               // util.setTransform(drag.mover,drag.myX,drag.myY);
+
+            }
+            console.log(drag.mover);
+            drag.mover = '';
+        }
+    },
+    go:function(evt){
+        if(drag.mover != ''){
+            util.setTransform(drag.mover,evt.layerX,evt.layerY);
+        }
+    },
+
+    checkHit:function(x,y,id){
+        x=x-game.BOARDX;
+        y=y-game.BOARDY;
+        console.log('x, y value: ', x, y);
+        console.log(id);
+        //go through ALL of the board
+        for(i=0;i<game.BOARDWIDTH;i++){
+            for(j=0;j<game.BOARDHEIGHT;j++){
+                var drop = game.boardArr[i][j].myBBox;
+
+                if(x>drop.x && x<(drop.x+drop.width) && y>drop.y && y<(drop.y+drop.height) && game.boardArr[i][j].droppable && game.boardArr[i][j].occupied == ''){
+                    //NEED - check is it a legal move???
+                    //if it is - then
+                    //put me to the center....
+                    util.setTransform(id,game.boardArr[i][j].getCenterX(),game.boardArr[i][j].getCenterY());
+                    //fill the new cell
+                    //alert(parseInt(which.substring((which.search(/\|/)+1),which.length)));
+                    game.thisPlayer.piece.changeCell(game.boardArr[i][j].id,i,j);
+                    //////////////////
+                    //change the board in the database for the other person to know
+                    //ajax.changeBoardAjax(id,i,j,'changeBoard',38);
+                    //change who's turn it is
+                   // util.changeTurn();
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
 }

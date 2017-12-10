@@ -31,7 +31,7 @@ function Cell(parent,id,size,row,col, num){
 
 
     // this.parent.appendChild(this.text);
-    //this.myBBox = this.getMyBBox();
+    this.myBBox = this.getMyBBox();
     console.log(this.myBBox);
 }
 

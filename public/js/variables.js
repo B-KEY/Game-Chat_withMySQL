@@ -21,6 +21,7 @@ var variable = {
 
     //jquery object
     _gameSection$ : $('#game-section'),
+    _gameId$:   $('#gameID'),
     _inviteThisUser$ : $('#inviteThisUser'),
     _chatSection$ : $('#chat-section'),
     _userName$ : $('#userName'),
@@ -31,6 +32,11 @@ var variable = {
     _player1Name$: '',
     _player1Score$: '',
     _thisUser$ : $('#this_user'),
+
+
+    //javascript variable
+    _thisPlayer: '',
+    _opponent: '',
 
 }
 
