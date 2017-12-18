@@ -4,11 +4,10 @@
  */
 
 manager = {
-
     myXHR : function (methodName,url,data,id){
     return $.ajax({
             url: url,
-            headers: {'X-CSRF-TOKEN': $('input[name=_token]').val()},
+            headers: { 'X-CSRF-TOKEN': $('input[name=_token]').val() },
             data: data,
             type: methodName,
             datatype: 'JSON',
@@ -26,20 +25,20 @@ manager = {
 
     acceptChallenge: function (e){
         var id = $(e).attr('id');
-        manager.myXHR('POST','./game/accept/' + id,'','').done(function(res){
-            if(res){
-                variable._gameSection$.append(variable._playgroundDiv);
-                game.drawGame(res.data.gameData);
+        $(e).remove();
+        manager.myXHR('POST','./game/accept/' + id,'','').done(function( res ){
+            if ( res.status ) {
+                messages.setMessageVaraibles(id, 'individual',$(e).text());
+                manager.getUserData(id,'individual');
             }
         });
     },
-    getGameData: function(id){
-        //
+    getGameData: function ( id ) {
         var url = './game/board/' + id;
         manager.myXHR('GET',url,'','').done(function(response){
             if(response){
                 variable._gameSection$.append(game.PLAYGOUND_DIV);
-                game.drawGame(res.data.gameData);
+                game.drawGame(response.data.gameData);
             }
         });
     },
@@ -63,30 +62,18 @@ manager = {
      * @param type type of the user.
      */
     getUserData:function (id,type) {
-        manager.myXHR('GET','./dashboard/'+ type + '/' +id,{type:type},'').done(function(response){
-            console.log(id, type);
-           // variable._receiverId$.attr('value',id);
-            //variable._receiverId$.attr('title',type);
+        manager.myXHR('GET','./dashboard/'+ type + '/' +id,{type:type},'').done(function(response) {
             manager.setSections(response);
         });
     },
 
     setSections :function(res) {
         if(res.status){
+            variable._userStat$.remove();
+            variable._game$.removeClass('invisible');
 
-            $('#game').removeClass('invisible');
-            $('#game').prev().remove();
-            console.log(res);
-
-            if(res.data.messageData.length === 0) return;
-
-            if(res.data.messageData.length === 1) {
-                messages.createChat(res);
-            } else {
-                $('.chatMessage').empty();
-                messages.createChat(res);
-            }
-
+            messages.handleMessageSection(res.data.messageData);
+            //messages.updateChat = setInterval(messages.getMoreMessages, 3000);
             if(res.challengeStatus){
                 variable._inviteThisUser$.addClass('invisible');
                 variable._chatSection$.removeClass('col-md-12');
@@ -112,16 +99,46 @@ manager = {
             console.log(res);
         }
     },
-    getThisUserData: function(e){
-        var user = $(e),
-            id = user.attr('id'),
-            type = user.attr('title');
-            variable._receiverID.setAttribute('value', id);
-            variable._receiverID.setAttribute('title', type);
-            variable._gameSection$.empty();
-            variable._userName$.text(user.text());
 
-            manager.getUserData(id,type);
-            variable._charMessages$.empty();
+    getThisUserData: function (e) {
+        if(game.canChangeUser()){
+            util.allWarning('Can\'t change user[drag your piece]');
+            return;
+        }
+        clearInterval(messages.updateChat);
+        var id = $(e).attr('id');
+        var type = $(e).attr('title');
+        var text = $(e).text();
+        messages.setMessageVaraibles(id, type, text);
+        variable._gameSection$.empty();
+        manager.getUserData(messages.receiver,messages.type);
+        variable._charMessages$.empty();
     }
 };
+
+
+// Get the modal
+var modal = document.getElementById('myModal');
+
+// Get the button that opens the modal
+var btn = document.getElementById("myBtn");
+
+// Get the <span> element that closes the modal
+var span = document.getElementsByClassName("close")[0];
+
+// // When the user clicks on the button, open the modal
+// btn.onclick = function() {
+//     modal.style.display = "block";
+// }
+
+// When the user clicks on <span> (x), close the modal
+span.onclick = function() {
+    modal.style.display = "none";
+}
+
+// When the user clicks anywhere outside of the modal, close it
+window.onclick = function(event) {
+    if (event.target == modal) {
+        modal.style.display = "none";
+    }
+}

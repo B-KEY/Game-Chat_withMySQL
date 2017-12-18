@@ -12,15 +12,17 @@ var variable = {
                     '<div style="position:absolute;top:30px;right:20px;"><input type="button" value="Roll">' +
                     '<div id="dice"></div>' +
                     '<div><ul><li  style="list-style:none; font-size:20px; margin-top: 20px; color:red"><span id="player0Name">Something</span><span  id="player0Score"></span></li>' +
-                    '<li  style="list-style:none;font-size:20px; margin-top: 20px; color:green"><span id="player1Name"></span><span id="player1Score"></span></li></ul></div></div>' +
-                    '<div id="error" class="alert alert-danger" style="display:none"></div>'+
+                    '<li  style="list-style:none;font-size:20px; margin-top: 20px; color:green"><span id="player1Name"></span><span id="player1Score"></span></li></ul>' +
+                    '<div  class="alert alert-danger" id="error" style="display:none"></div></div></div>' +
                     '</div>',
     _invitedDiv:    '<div id="invite_message_sent">' +
                     '<h3>Your request has been sent.</h3>' +
                     '<span>Game will begin once the user accept the request</span></div>',
 
+
     //jquery object
     _gameSection$ : $('#game-section'),
+    _chatInputText$ : $('#messageText'),
     _gameId$:   $('#gameID'),
     _inviteThisUser$ : $('#inviteThisUser'),
     _chatSection$ : $('#chat-section'),
@@ -32,11 +34,11 @@ var variable = {
     _player1Name$: '',
     _player1Score$: '',
     _thisUser$ : $('#this_user'),
+    _error$: '',
+    _userStat$:  $('#stat'),
+    _game$: $('#game'),
+    _chatMessages$: $('.chatMessage'),
 
-
-    //javascript variable
-    _thisPlayer: '',
-    _opponent: '',
 
 }
 

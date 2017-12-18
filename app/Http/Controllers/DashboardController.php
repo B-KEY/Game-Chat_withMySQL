@@ -13,8 +13,13 @@ use App\GameMove;
 class DashboardController extends Controller
 {
 
+    private $message = [
+        'error' => 'Something wnet wrong',
+        'success' => 'Retrieval was successful'
+    ];
     private $error = 'Something went wrong';
     private $success = 'Retrieval was successful';
+
 
 
     /**
@@ -26,20 +31,18 @@ class DashboardController extends Controller
     {
         $this->middleware('auth');
     }
-
     /**
      * Show the application dashboard.
      *
      * @return \Illuminate\Http\Response
      */
+
     public function index()
     {
         $user_id = auth()->user()->id;
         $challenges = [];
         $groupArray = [];
         $userArray =[];
-        $error = "Something went wrong";
-
         try {
             /**************************************************************************************************************************************/
             // getting all the challenges and preparing array
@@ -57,7 +60,7 @@ class DashboardController extends Controller
             $users = User::where('id','!=',$user_id)->get();
 
             foreach($users as $user) {
-                $userArray[] = ['id' => /*base64_encode(rand(0,9) . '_player_' . rand(0,9) . '_' . rand(0,9).*/$user->id/* . '_'. rand(0,9))*/,
+                $userArray[] = ['id' => $user->id,
                     'image_url' => $user->image_url, 'name' => $user->name];
             }
             /**************************************************************************************************************************************/
@@ -67,7 +70,7 @@ class DashboardController extends Controller
 
             $groups = Group::all();
             foreach($groups as $group) {
-                $groupArray[] = ['id' => /*base64_encode(rand(0,9) . '_group_' . rand(0,9) . '_' . rand(0,9).*/$group->id/* . '_'. rand(0,9))*/,
+                $groupArray[] = ['id' => $group->id,
                     'image_url' => $group->image_url, 'name' => $group->name];
             }
             /**************************************************************************************************************************************/
@@ -83,15 +86,12 @@ class DashboardController extends Controller
 
     public function show($type,$id)
     {
-        // apply encryption
+
         try {
             $challengeStatus = null;
             $messageData = [];
             $data = [];
             if (($type === 'group') || ($type == 'individual')) {
-                /*$encryptedID = explode('_', base64_decode($id));
-                $id = substr($encryptedID[3], 1);*/
-                //return $id;
 
                 $user_id1 = $id;
                 $user_id2 = auth()->user()->id;
@@ -110,8 +110,8 @@ class DashboardController extends Controller
                     $messageData[] = [
                         'body' => $msg->body,
                         'created_at' => $msg->created_at->format('H:i'),
-                        'username' => $msg->user->name,
-                        'userimage' => $msg->user->image_url
+                        'userName' => $msg->user->name,
+                        'userImage' => $msg->user->image_url
                     ];
                 }
                 /**************************************************************************************************************************************/
@@ -127,67 +127,37 @@ class DashboardController extends Controller
                         $challengeStatus = $challenge->status;
                         if($challengeStatus === 'accepted'){
                             $gameMove = GameMove:: where('game_id', $challenge->game_id)->first();
-
-                            list($X, $Y) = explode(',',$gameMove->player0_toPosition);
-                            $player0PositionX = $X;
-                            $player0PositionY =  $Y;
-                            $player0Score = $gameMove->player0_score;
-                            $player0Rolled = $gameMove->player0_rolled;
                             $player0Name = $challenge->haveChallenged->name;
-
-                            list($X, $Y) = explode(',',$gameMove->player1_toPosition);
-                            $player1PositionX = $X;
-                            $player1PositionY =  $Y;
-                            $player1Score = $gameMove->player1_score;
-                            $player1Rolled = $gameMove->player1_rolled;
                             $player1Name = $challenge->getChallenged->name;
-
                             list($HEIGHT, $WIDTH, $SIZE) = explode('x',$challenge->game->board_dimension);
-
                             $gameData = [
                                 'game'=> [
-                                            'id' => /*base64_encode(rand(0,9) . '_game_' . rand(0,9) . '_' . rand(0,9).*/$gameMove->game_id/* . '_'. rand(0,9))*/,
-                                            'turn' => $gameMove->whoseTurn,
+                                            'id' => $gameMove->game_id,
+                                            'whoseturn' => $gameMove->whoseTurn,
                                             'height' => $HEIGHT,
                                             'width' => $WIDTH,
                                             'size' => $SIZE
                                 ],
-                                'player0' => [
-                                            'id' =>  /*base64_encode(rand(0,9) . '_player_' . rand(0,9) . '_' . rand(0,9).*/$gameMove->player0_id/* . '_'. rand(0,9))*/,
-                                            'piece_id' => $gameMove->player0_pieceId,
-                                            'x' => $player0PositionX,
-                                            'y' => $player0PositionY,
-                                            'score' => $player0Score,
-                                            'rolled' => $player0Rolled,
-                                            'name' => $player0Name
-                                ],
-                                'player1' => [
-                                            'id' =>  /*base64_encode(rand(0,9) . '_player_' . rand(0,9) . '_' . rand(0,9).*/$gameMove->player1_id/* . '_'. rand(0,9))*/,
-                                            'piece_id' => $gameMove->player1_pieceId,
-                                            'x' => $player1PositionX,
-                                            'y' => $player1PositionY,
-                                            'score' => $player1Score,
-                                            'rolled' => $player1Rolled,
-                                            'name' => $player1Name
-                                ]
+                                'player0' => $this -> returnPlayerArray('player0', $gameMove, $player0Name),
+                                'player1' => $this -> returnPlayerArray('player1', $gameMove, $player1Name)
                             ];
                         }
                     }
                     $data = ['messageData' => $messageData, 'gameData' => $gameData];
-                    return $this -> sendResponse(true, $this->success, $data, $challengeStatus);
+                    return $this -> sendResponse(true, $this -> message['success'], $data, $challengeStatus);
                 }
                 /**************************************************************************************************************************************/
 
                 //return data for group users
-                return $this -> sendResponse(true, $this->success, $data, $challengeStatus);
+                return $this -> sendResponse(true, $this -> message['success'], $data, $challengeStatus);
 
             } else {
-                return $this -> sendResponse(false, $this->error, null, $challengeStatus);
+                return $this -> sendResponse(false, $this -> message['error'], null, $challengeStatus);
             }
         } catch (\Illuminate\Database\QueryException $ex) {
-            return $this -> sendResponse(false, $this->error, null, $challengeStatus);
+            return $this -> sendResponse(false, $this -> message['error'], null, $challengeStatus);
         } catch(Exception $ex) {
-            return $this -> sendResponse(false, $this->error, null, $challengeStatus);
+            return $this -> sendResponse(false, $this -> message['error'], null, $challengeStatus);
         }
     }
 
@@ -213,6 +183,25 @@ class DashboardController extends Controller
             ->orWhere('id',$searchParam2)
             ->orderBy('created_at','desc')
             ->first();
+    }
+
+    public function returnPlayerArray($player, $gameMove, $name) {
+
+        list($X, $Y) = explode(',', $gameMove -> { $player . '_toPosition' } );
+        $positionX = $X;
+        $positionY =  $Y;
+        $playerScore = $gameMove->{ $player . '_score' };
+        $playerRolled = $gameMove->{ $player . '_rolled' };
+
+        return [
+            'id' =>  $gameMove -> { $player . '_id' },
+            'piece_id' => $gameMove -> { $player . '_pieceId' },
+            'x' => $positionX,
+            'y' => $positionY,
+            'score' => $playerScore,
+            'rolled' => $playerRolled,
+            'name' => $name
+        ];
     }
 
 }

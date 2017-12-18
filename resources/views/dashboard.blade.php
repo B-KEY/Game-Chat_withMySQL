@@ -56,7 +56,7 @@
                                             <div style="width:100%;color:#000;text-align:right">
                                                 <input style="border:none;width:100%;height: 50px;margin-top:10px;margin-bottom: 5px; padding:10px
                                                 ;background:rgba(141,163,153,.4)border-radius: 5px;"
-                                                       type="text" name="message" class="message"  placeholder="Type your message">
+                                                       type="text" name="message" class="message" id ="messageText"  placeholder="Type your message">
                                                 <button onclick="messages.send(this)" style="border:1px solid #080808;
                                              -webkit-border-radius: 5px;-moz-border-radius: 5px;border-radius:
                                              5px;background-color: #337ab7">Send</button>
@@ -129,8 +129,7 @@
                             @endforeach
                         </ul>
                     @endif
-
-                        </div>
+                </div>
             </div>
         </div>
     </div>

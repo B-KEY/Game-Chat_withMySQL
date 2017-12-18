@@ -20,7 +20,7 @@ Route::get('/dashboard/{type}/{id}', 'DashboardController@show');
 
 
 Route::resource('/messages','MessagesController');
-Route::get('/messages/getMore/{id}/{date}','MessagesController@getMore');
+Route::get('/messages/getMore/{id}/{date}/{type}','MessagesController@getMore');
 Route::resource('/games','GameController');
 Route::post('/game/invite/{id}', 'GameController@invite');
 Route::post('/game/accept/{id}', 'GameController@accept');

@@ -8,30 +8,7 @@
 // Piece constructor
 // creates and initializes each Piece object
 function Piece(board,player,cellRow,cellCol,type,color){
-    /*this.board = board;			// piece needs to know the svg board object so that it can be attached to it.
-    this.player = player;		// piece needs to know what player it belongs to.
-    this.type = type;			// piece needs to know what type of piece it is. (put in so it could be something besides a checker!)
-    this.current_cell = null    //game.boardArr[cellRow][cellCol];	// piece needs to know what its current cell/location is.
-    //id looks like 'piece_0|3' - for player 0, the third piece
-    this.id = "piece_" + this.player + "|" + this.number;	// the piece also needs to know what it's id is.
-    this.x=cellRow//this.current_cell.getCenterX();						// the piece needs to know what its x location value is.
-    this.y=cellCol//this.current_cell.getCenterY();						// the piece needs to know what its y location value is as well.
-    //this.object = eval("new " + type + "(this)");	//eval I wrote in class because I was lazy - better on next line
-    this.pieceColor = color;
 
-    this.object=new window[type](this);				// based on the piece type, you need to create the more specific piece object (Checker, Pawn, Rook, etc.)
-    this.piece = this.object.piece;					// a shortcut to the actual svg piece object
-    this.setAtt("id",this.id);						// make sure the SVG object has the correct id value (make sure it can be dragged)
-    if(this.player == 'playerId'){
-        this.piece.addEventListener('mousedown',function(){ drag.setMove(this.id);},false);	// add a mousedown event listener to your piece so that it can be dragged.
-    }else{
-        this.piece.addEventListener('mousedown',util.nypwarning,false);	//tell the user that isn't his piece!
-    }
-    //this.piece.addEventListener('mousedown',function(){ document.getElementById('output2').firstChild.nodeValue=this.id;},false); 	//for testing purposes only...
-    document.getElementsByTagName('svg')[0].appendChild(this.piece);
-
-    // return this piece object
-    return this;*/
 
 
     this.board = board;			// piece needs to know the svg board object so that it can be attached to it.
@@ -47,8 +24,8 @@ function Piece(board,player,cellRow,cellCol,type,color){
     //id looks like 'piece_0|3' - for player 0, the third piece
     this.id = "piece_" + this.player;	// the piece also needs to know what it's id is.
     this.current_cell.isOccupied(this.id);			//set THIS board cell to occupied
-    this.x= (cellRow>20) ? cellRow : this.current_cell.getCenterX();						// the piece needs to know what its x location value is.
-    this.y= (cellRow>20) ? cellCol : this.current_cell.getCenterY();						// the piece needs to know what its y location value is as well.
+    this.x = (cellRow>20) ? cellRow : this.current_cell.getCenterX();						// the piece needs to know what its x location value is.
+    this.y = (cellRow>20) ? cellCol : this.current_cell.getCenterY();						// the piece needs to know what its y location value is as well.
 
     //this.object = eval("new " + type + "(this)");	//eval I wrote in class because I was lazy - better on next line
     this.object=new window[type](this);				// based on the piece type, you need to create the more specific piece object (Checker, Pawn, Rook, etc.)
@@ -56,12 +33,12 @@ function Piece(board,player,cellRow,cellCol,type,color){
     this.setAtt("id",this.id);						// make sure the SVG object has the correct id value (make sure it can be dragged)
 
 
-    console.log("this player id :" + this.player, game.thisPlayer.id);
+
     if(this.player == game.thisPlayer.id){
         this.piece.addEventListener('mousedown',function(){ drag.setMove(this.id);},false);	// add a mousedown event listener to your piece so that it can be dragged.
       }else{
-          this.piece.addEventListener('mousedown',util.warning,false);	//tell the user that isn't his piece!
-    }
+          this.piece.addEventListener('mousedown', function(){ util.allWarning('Not your piece'); }, false);
+    }	//tell the user that isn't his piece!
     //this.piece.addEventListener('mousedown',function(){ document.getElementById('output2').firstChild.nodeValue=this.id;},false); 	//for testing purposes only...
     document.getElementsByTagName('svg')[0].appendChild(this.piece);
 
@@ -79,7 +56,6 @@ Piece.prototype={
     },
     //when called, will remove the piece from the document and then re-append it (put it on top!)
     putOnTop:function(){
-        console.log('I got called.', this.piece);
         document.getElementsByTagName('svg')[0].removeChild(this.piece);
         document.getElementsByTagName('svg')[0].appendChild(this.piece);
     },
@@ -152,7 +128,7 @@ function SnakeLadder(parent) {
     var circ = document.createElementNS(game.svgns,"circle");
     circ.setAttributeNS(null,"r",'20');
     circ.setAttributeNS(null,"fill", this.parent.pieceColor);
-    console.log(this.parent.pieceColor);
+
     circ.setAttributeNS(null,"opacity",'0.8');
     this.piece.appendChild(circ);
     var circ = document.createElementNS(game.svgns,"circle");

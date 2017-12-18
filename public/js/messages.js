@@ -1,37 +1,23 @@
 
 var messages = {
 
-    // popupChat: function(e)
-    // {
-    //     var user = $(e);
-    //     var id = user.attr('id');
-    //     var type = user.attr('title');
-    //     $('#receiver_id').attr('value',id);
-    //     $('#receiver_id').attr('title',type);
-    //     $('#game-section').empty();
-    //
-    //     $('#userName').text(user.text());
-    //     manager.getUserData(id,type);
-    //     $('.chatMessage').empty();
-    // },
-
-
-
-
+    receiver: '',
+    lastRetrieved: '',
+    type:'',
+    updateChat: '',
 
     /**
      * This function sends the single chat to the server.
      * @param e
      */
-    // need to remove dependency.
-    send : function(e) {
-        var messageBox = $(e).prev();
-        var message = messageBox.val();
-        messageBox.val('');
-        var id = $('#receiver_id').attr('value');
-        var type = $('#receiver_id').attr('title');
-        manager.myXHR('POST','./messages',{id:id,message: message,type: type},'').done(function(response){
-            messages.putMessage(response);
+    send : function() {
+        var message = variable._chatInputText$.val();
+        variable._chatInputText$.val('');
+        manager.myXHR('POST','./messages',{id:messages.receiver, message: message, type: messages.type}, '')
+            .done(function(response){
+                (response.status)
+                    ? messages.handleMessageSection(response.data.messageData)
+                    : util.showModal('error');
         });
     },
 
@@ -39,37 +25,43 @@ var messages = {
      * This function takes the response from the server and create the message box.
      * @param res
      */
-    createChat: function(res){
-    res.data.messageData.forEach(function(e) {
-        message = '<div class="row" style="color:#090909;height:auto;' +
-            'border-bottom:0.5px dashed rgba(0,0,0,0.1);margin-top:5px;margin-bottom:5px;">' + '<div class="col-md-1"><img src="'+e.userimage+'" ' +
+    createChat: function(res) {
+        res.forEach(function(e) {
+            message = '<div class="row" style="color:#090909;height:auto;' +
+            'border-bottom:0.5px dashed rgba(0,0,0,0.1);margin-top:5px;margin-bottom:5px;">' + '<div class="col-md-1"><img src="'+e.userImage+'" ' +
             'style="height:40px;width:40px"><span style="font-size:12px;font-weight:300;font-style:Sans Serif">'+e.created_at+'</span></div>' +
-            '<div class="col-md-11"><h5 style="font-weight:bolder">'+e.username+'</h5><span>'+ e.body +'</span></div></div>';
-        $('.chatMessage').append(message);
+            '<div class="col-md-11"><h5 style="font-weight:bolder">'+e.userName+'</h5><span>'+ e.body +'</span></div></div>';
+        variable._chatMessages$.append(message);
         $("#lst_saved").attr('value',e.created_at);
+        messages.lastRetrieved = e.created_at;
         });
     },
-    putMessage :function(res) {
-        if(res.status) {
 
-            if (res.data.length === 0) return;
-            if (res.data.length === 1) messages.createChat(res);
-            else {
-                $('.chatMessage').empty();
-                messages.createChat(res);
-            }
+    handleMessageSection: function(response) {
+        if( response.length === 0 ) return;
+        if( response.length === 1 ) {
+            messages.createChat(response);
+        } else {
+            variable._chatMessages$.empty();
+            messages.createChat(response);
         }
-    }
+    },
 
+    setMessageVaraibles: function (id, type, text){
+        messages.receiver = id;
+        messages.type  = type;
+        variable._receiverID.setAttribute('value', messages.receiver);
+        variable._receiverID.setAttribute('title', messages.type);
+        variable._userName$.text(text);
+    },
+    getMoreMessages : function() {
+        var url = './messages/getMore/' + messages.receiver+'/'+messages.lastRetrieved+'/'+messages.type;
+        manager.myXHR('GET',url,{id:messages.receiver},'').done(function (response) {
+            messages.handleMessageSection(response.data.messageData);
+        });
+    }
 }
 
 
-// setInterval(function() {
-//     var id = $('#receiver_id').attr('value');
-//     var date = $('#lst_saved').attr('value');
-//     var url = './messages/getMore/' + id+'/'+date;
-//     myXHR('GET',url,{id:id},'');
-//     var chatBox = $('.chatMessage');
-// }, 1000);
 
 

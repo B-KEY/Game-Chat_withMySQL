@@ -93,7 +93,18 @@ var util = {
         }else{
             document.getElementById('error').setAttributeNS(null,'display','none');
         }
+    },
+
+    allWarning: function(someText) {
+        if(variable._error$.css('display') === 'none'){
+            variable._error$.css('display', 'inline');
+            variable._error$.text(someText);
+            setTimeout(util.allWarning,2000);
+        }else{
+            variable._error$.css('display','none');
+        }
     }
+
 };
 
 

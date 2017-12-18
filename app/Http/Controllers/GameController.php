@@ -26,8 +26,19 @@ class GameController extends Controller
         'waitingForDrag' => 'Waiting for you drag. Board with be updated in 10 sec and move will change unless you drag your piece',
         'gameOver' => 'Game Over!',
         'gameStart' => 'Game Started',
-        'gameStartedError' => 'Game already started. Cann\'t make more entries.'
+        'gameStartedError' => 'Game already started. Cann\'t make more entries.',
+        'badRequest' => 'Bad request'
         ];
+
+    /**
+     * Create a new controller instance.
+     *
+     * @return void
+     */
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
     /**
      * Display a listing of the resource.
      *
@@ -56,17 +67,16 @@ class GameController extends Controller
      */
     public function store(Request $request)
     {
-        // check if the game_id exist
-        if($request->gameId  && $request->id) {
 
-        }
+            $testPlayer1 = filter_var ( $request->id, FILTER_SANITIZE_STRING);
+            $gameId = filter_var ($request->gameId, FILTER_SANITIZE_STRING);
 
-            //set required variables
-            $testPlayer1 = $request->id;
+            if($testPlayer1 == '' || $gameId == '')
+                return $this -> sendResponse('false', $this-> message['badRequest'], null, null);
+
             $testPlayer2 = auth()->user()->id;
             $data = ['messageData' => [], 'gameData' => []];
             $challengeStatus = null;
-            $gameId = $request->gameId;
 
             // define snakes presence and how much it will take you down
             $snake = array(0 => 95, 1 => 98, 3 => 87, 4 => 54, 5 => 64 , 6 => 17);
@@ -75,7 +85,6 @@ class GameController extends Controller
             // define ladders and how much clim to clim
             $ladder = array(0 => 4, 1 => 20, 3 => 28, 4 => 40, 5 => 63, 6 => 71);
             $ladderClimDiff = [10, 18, 56, 19, 18, 20];
-
 
             //roll the dice
             $diceValue = rand(1,6);
@@ -86,12 +95,6 @@ class GameController extends Controller
             $originalPlayer2 = $gameMove->player1_id;
 
             //for challenges
-//            $searchParam1  = $originalPlayer1 . '|' . $originalPlayer2;
-//            $searchParam2  = $originalPlayer2 . '|' . $originalPlayer1;
-////            $challenge = Challenge::where('id',$searchParam1)
-//                ->orWhere('id',$searchParam2)
-//                ->orderBy('created_at','desc')
-//                ->first();
             $challenge = $this -> returnChallenge($originalPlayer1, $originalPlayer2, 'neutral');
             // both players belong to this game
             if(
@@ -112,7 +115,15 @@ class GameController extends Controller
                     $gameMove -> whoseTurn !== (int)$gameMove->{ $player.'_id' } ||
                     $gameMove -> { $player.'_rolled' } !== 'no' ) { // this checks if the player who have played is a valid player.
 
-                    $gameData = ['diceValue' => $diceValue, 'whoseTurn' => $gameMove -> whoseTurn , 'rolled' => $gameMove -> {$player . '_rolled'}  ];
+                    $gameData = [
+                        'game'=> [
+                            'id' => $gameMove->game_id,
+                            'whoseTurn' => $gameMove->whoseTurn,
+                            'diceValue' => $diceValue
+                        ],
+                        'player' => $this -> returnPlayerArray($player, $gameMove, false)
+                    ];
+                    //$gameData = ['diceValue' => $diceValue, 'whoseTurn' => $gameMove -> whoseTurn , 'rolled' => $gameMove -> {$player . '_rolled'}  ];
                     $data['gameData'] = $gameData;
                     return $this -> sendResponse(true, 'Not Your Turn', $data, $challengeStatus);
                 } else { // if the user is a valid user to play
@@ -138,7 +149,15 @@ class GameController extends Controller
                         $gameMove -> whoseTurn = $gameMove->{ $opponentId . '_id'};
                         $gameMove -> save();
                         $winningDiff = 99 - $oldScore ;
-                        $gameData = ['diceValue' => $diceValue, 'whoseTurn' => $gameMove -> whoseTurn , 'rolled' => $gameMove -> {$player . '_rolled'}  ];
+                       // $gameData = ['diceValue' => $diceValue, 'whoseTurn' => $gameMove -> whoseTurn , 'rolled' => $gameMove -> {$player . '_rolled'}  ];
+                        $gameData = [
+                            'game'=> [
+                                'id' => $gameMove->game_id,
+                                'whoseTurn' => $gameMove->whoseTurn,
+                                'diceValue' => $diceValue
+                            ],
+                            'player' => $this -> returnPlayerArray($player, $gameMove, false)
+                        ];
                         $data['gameData'] = $gameData;
                         return $this -> sendResponse(true, 'You need more' . $winningDiff, $data, $challengeStatus );
                     } else { // this is an assurance that the move and score now can be saved in the data base.
@@ -174,9 +193,16 @@ class GameController extends Controller
                                 $returnResult = ['gameId' => $result -> game_id, 'winner' => $result -> winner, 'loser' => $result -> loser];
                                 $gameData = [ 'result' => $returnResult ];
                                 $data['gameData'] = $gameData;
-                                return $this -> sendResponse(true, 'You won the game', $data, $challengeStatus);
+                                return $this -> sendResponse(true, $this -> message['won'], $data, $challengeStatus);
                             }
-                        $gameData = ['diceValue' => $diceValue, 'whoseTurn' => $gameMove -> whoseTurn , 'rolled' => $gameMove -> {$player . '_rolled'}];
+                        $gameData = [
+                            'game'=> [
+                                'id' => $gameMove->game_id,
+                                'whoseTurn' => $gameMove->whoseTurn,
+                                'diceValue' => $diceValue
+                            ],
+                            'player' => $this -> returnPlayerArray($player, $gameMove, false)
+                        ];
                         $data['gameData'] = $gameData;
                         return $this -> sendResponse(
                             true,
@@ -198,11 +224,16 @@ class GameController extends Controller
     public function changeTurn(Request $request){
 
 
-        $testPlayer1 = $request->id;
+        $testPlayer1 = filter_var ( $request->id, FILTER_SANITIZE_STRING);
+        $gameId = filter_var ($request->gameId, FILTER_SANITIZE_STRING);
+
+        if($testPlayer1 == '' || $gameId == '')
+            return $this -> sendResponse('false', $this-> message['badRequest'], null, null);
+
         $testPlayer2 = auth()->user()->id;
         $data = ['messageData' => [], 'gameData' => []];
         $challengeStatus = null;
-        $gameId = $request->gameId;
+
         //retrieve game
         $gameMove = GameMove:: where('game_id', $gameId)->first();
         $originalPlayer1 = $gameMove->player0_id;
@@ -212,18 +243,6 @@ class GameController extends Controller
         $challenge = $this -> returnChallenge($originalPlayer1, $originalPlayer2, 'neutral');
         $challengeStatus = $challenge->status;
 
-        if($challengeStatus === 'finished') {
-            $result = Result::where('game_id',$gameId)->first();
-            $returnResult = ['gameId' => $result -> game_id, 'winner' => $result -> winner, 'loser' => $result -> loser];
-            $gameData = ['result' => $returnResult ];
-            $data['gameData'] = $gameData;
-            return $this -> sendResponse(
-                true,
-                $this -> message['gameOver'],
-                $data,
-                $challengeStatus
-            );
-        }
         if(
             ($originalPlayer1 == $testPlayer1 && $originalPlayer2 == $testPlayer2) ||
             ($originalPlayer1 == $testPlayer2 && $originalPlayer2 == $testPlayer1) ||
@@ -235,7 +254,7 @@ class GameController extends Controller
             ((int)$opponentId === 0) ? $opponentId = 'player1' : $opponentId = 'player0';
             // Check for valid turn.
 
-            if($gameMove->whoseTurn === $gameMove->{$opponentId.'_id'}){
+            if($gameMove->whoseTurn == $gameMove -> {$opponentId.'_id'}){
                 return $this -> sendResponse(
                     true,
                     $this -> message['waitingForOther'],
@@ -251,7 +270,7 @@ class GameController extends Controller
                         'id' => $gameMove->game_id,
                         'whoseTurn' => $gameMove->whoseTurn,
                     ],
-                   'player' => $this -> returnPlayerArray($player, $gameMove)
+                   'player' => $this -> returnPlayerArray($player, $gameMove, false)
                 ];
                 $data['gameData'] = $gameData;
                 return $this -> sendResponse(
@@ -262,7 +281,6 @@ class GameController extends Controller
                 );
             }
         }
-
     }
 
     /**
@@ -273,10 +291,79 @@ class GameController extends Controller
      */
     public function show($id)
     {
+
         $gameMove = GameMove:: where('game_id', $id)->first();
-        $toPosition = explode(',', $gameMove->player0_toPosition);
-        return array('X'=> $toPosition[0], 'Y'=> $toPosition[1]);
-    }
+        $originalPlayer1 = $gameMove->player0_id;
+        $originalPlayer2 = $gameMove->player1_id;
+        $challenge = $this -> returnChallenge($originalPlayer1, $originalPlayer2, 'neutral');
+        $challengeStatus = $challenge->status;
+        (auth()->user()->id == $originalPlayer1) ? $thisPlayer = 'player0': $thisPlayer = 'player1';
+        ($thisPlayer == 'player0' )? $opponent = 'player1': $opponent = 'player0';
+
+        if($challengeStatus === 'finished') {
+            $result = Result::where('game_id', $id)->first();
+            $returnResult = ['gameId' => $result -> game_id, 'winner' => $result -> winner, 'loser' => $result -> loser];
+            $gameData = ['result' => $returnResult ];
+            $data['gameData'] = $gameData;
+            return $this -> sendResponse(
+                true,
+                $this -> message['gameOver'],
+                $data,
+                $challengeStatus
+            );
+        }
+
+        if( $gameMove -> { $opponent. '_rolled'} == 'yes' && $gameMove -> { $thisPlayer. '_rolled'} =='no'){
+            $data  = ['messageData' => [], 'gameData' => []];
+            $gameData = [
+                'game'=> [
+                    'id' => $gameMove->game_id,
+                    'whoseTurn' => $gameMove->whoseTurn,
+                ],
+                'opponent' => $this -> returnPlayerArray($opponent, $gameMove, false),
+                'thisPlayer' => $this -> returnPlayerArray($thisPlayer, $gameMove, false)
+            ];
+            $data['gameData'] = $gameData;
+            return $this -> sendResponse(true, 'Retrieved successfully', $data, $challengeStatus);
+        }  else {
+            $data  = ['messageData' => [], 'gameData' => []];
+            $gameData = [
+                'game'=> [
+                    'id' => $gameMove->game_id,
+                    'whoseTurn' => $gameMove->whoseTurn,
+                ]
+            ];
+            $data['gameData'] = $gameData;
+            return $this -> sendResponse(true, 'Waiting for other player', $data, $challengeStatus);
+        }
+
+//        if($gameMove -> { $opponent . '_rolled' } == 'no' && $gameMove -> { $thisPlayer.'_rolled' } == 'yes') {
+//            $data  = ['messageData' => [], 'gameData' => []];
+//            $gameData = [
+//                'game'=> [
+//                    'id' => $gameMove->game_id,
+//                    'whoseTurn' => $gameMove->whoseTurn,
+//                ],
+//                'player' => $this -> returnPlayerArray($opponent, $gameMove, false)
+//            ];
+//            $data['gameData'] = $gameData;
+//            return $this -> sendResponse(true, 'Retrieved successfully', $data, $challengeStatus);
+//        };
+//
+//        if($gameMove -> { $opponent . '_rolled' } == 'yes' && $gameMove -> { $thisPlayer.'_rolled' } == 'yes') {
+//            $data  = ['messageData' => [], 'gameData' => []];
+//            $gameData = [
+//                'game'=> [
+//                    'id' => $gameMove->game_id,
+//                    'whoseTurn' => $gameMove->whoseTurn,
+//                ],
+//                'player' => $this -> returnPlayerArray($opponent, $gameMove, true)
+//            ];
+//            $data['gameData'] = $gameData;
+//            return $this -> sendResponse(true, 'Retrieved successfully', $data, $challengeStatus);
+//        };
+
+}
 
     /**
      * Show the form for editing the specified resource.
@@ -414,13 +501,13 @@ class GameController extends Controller
                 $gameData = [
                     'game'=> [
                         'id' => $move->game_id,
-                        'turn' => $move->whoseTurn,
+                        'whoseturn' => $move->whoseTurn,
                         'height' => $HEIGHT,
                         'width' => $WIDTH,
                         'size' => $SIZE
                     ],
-                    'player0' => $this -> returnPlayerArray('player0', $move),
-                    'player1' => $this -> returnPlayerArray('player1', $move)
+                    'player0' => $this -> returnPlayerArray('player0', $move, false),
+                    'player1' => $this -> returnPlayerArray('player1', $move, false)
                 ];
                 /********************************************************************************************************************************/
 
@@ -448,8 +535,6 @@ class GameController extends Controller
         if($id !== ''){
             $user = auth()->user()->id;
             $challenge = $this -> returnChallenge($user, $id, 'requested');
-//            $challenge = Challenge::where('id', $searchParam1)->orWhere('id', $searchParam2)->where('status','requested')
-//                ->first();
             $data = ['challenge' => $challenge];
             return array('status'=> true, 'data' => $data);
         }
@@ -475,7 +560,6 @@ class GameController extends Controller
             'data' => $data,
             'challengeStatus' => $challengeStatus
         );
-
     }
 
     public function returnChallenge($player0, $player2, $condition){
@@ -496,9 +580,13 @@ class GameController extends Controller
 
     }
 
-    public function returnPlayerArray($player, $gameMove) {
+    public function returnPlayerArray($player, $gameMove, $rolled) {
 
-        list($X, $Y) = explode(',', $gameMove -> { $player . '_toPosition' } );
+        ($rolled)
+            ? list($X, $Y) = explode(',', $gameMove -> { $player . '_fromPosition' } )
+            : list($X, $Y) = explode(',', $gameMove -> { $player . '_toPosition' } );
+
+
         $positionX = $X;
         $positionY =  $Y;
         $playerScore = $gameMove->{ $player . '_score' };
@@ -513,4 +601,5 @@ class GameController extends Controller
             'rolled' => $playerRolled
         ];
     }
+
 }

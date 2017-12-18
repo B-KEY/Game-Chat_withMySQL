@@ -8,6 +8,25 @@ use App\Challenge;
 
 class MessagesController extends Controller
 {
+    private $sender; // always auth()->user->id;
+    private $receiver; // opponent
+    private $data ; // data to send
+    private $type; // type of message
+    private $challengeStatus;
+    private $message = [
+        'newMessage' => 'New message retrieved successfully',
+        'allMessage' => 'All message retrieved successfully',
+        'badRequest' => 'Bad Request'
+    ];
+    /**
+     * Create a new controller instance.
+     *
+     * @return void
+     */
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
     /**
      * Display a listing of the resource.
      *
@@ -36,43 +55,48 @@ class MessagesController extends Controller
      */
     public function store(Request $request)
     {
-        $type = $request->type;
 
-        if(($type === 'group') ||($type=='individual')) {
+        if($this -> checkRequest($request, '')) {
+
             $message = new Message();
-            $reciever_id = $request->id;
-            $sender_id = auth()->user()->id;
-            $message_id = $sender_id . '|' . $reciever_id;
+            $message_id = $this -> sender . '|' . $this -> receiver;
 
-            ($type === 'group')? $message->id = $reciever_id: $message->id = $message_id;
-            $message->sender = $sender_id;
-            $message->body = $request->message;
-            $message->available = true;
-            $message->receiver = $reciever_id;
-            $message->save();
+            ($this -> type === 'group')? $message->id = $this -> receiver: $message->id = $message_id;
+
+            $message -> sender = $this -> sender;
+            $messageBody = filter_var ( $request->message, FILTER_SANITIZE_STRING);
+            $message -> body = $messageBody;
+            $message -> available = true;
+            $message -> receiver = $this -> receiver;
+            $message -> save();
+
 
             //retrieve the first row.
             $search_param1 = $message_id;
-            $search_param2 = $reciever_id. '|' . auth()->user()->id;
+            $search_param2 = $this -> receiver. '|' .$this -> sender;
 
-            ($request->type !== 'group') ? $messages  = Message::where('id',$search_param1)
-                    ->orWhere('id',$search_param2)->orderBy('created_at','desc')
-                    ->take(1)->get()
-                :
-                $messages = Message::where('id',$reciever_id)->orderBy('created_at','desc')
-                    ->take(1)->get();
-            $data = [];
-            foreach($messages as $msg) {
-                $data[] = ['body' => $msg->body, 'created_at' => $msg->created_at->format('H:i'),
-                    'username' => $msg->user->name, 'userimage' => $msg->user->image_url];
-            }
-            return array('status' => true, 'data' => $data);
+            ($request->type === 'individual')
+                ? $message = Message::where ('id', $search_param1)
+                    -> orWhere('id', $search_param2)
+                    -> orderBy('created_at', 'desc')->first()
+                : $message = Message::where('id', $this -> receiver)
+                    ->orderBy('created_at', 'desc')
+                    ->first();
+
+            $this -> data['messageData'] = [
+                ['body' => $message->body,
+                'created_at' => $message->created_at->format('H:i'),
+                'userName' => $message->user->name,
+                'userImage' => $message->user->image_url]
+            ];
+
+            return $this->sendResponse(true, $this -> message['newMessage'], $this -> data, $this -> challengeStatus);
         }
         else{
-            return array('status' => false, 'messages' =>'something went wrong');
+            return $this->sendResponse(true, $this -> message['badRequest'], $this -> data, $this -> challengeStatus);
         }
-
     }
+
 
     /**
      * Display the specified resource.
@@ -81,41 +105,35 @@ class MessagesController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function show($id, Request $request)
-
     {
-        // apply encryption
-        $type = $request->type;
-        if(($type === 'group') || ($type=='individual')) {
-            $user_id1 = $id;
-            $user_id2 = auth()->user()->id;
-            $challengeData = [];
-
-            $searchParam1 = $user_id1 . '|' . $user_id2;
-            $searchParam2 = $user_id2 . '|' . $user_id1;
-
-            ($type !== 'group') ? $messages = Message::where('id', $searchParam1)->orWhere('id', $searchParam2)
-                ->get()
-                : $messages = Message::where('id', $id)->get();
-            $data = [];
-            foreach ($messages as $msg) {
-                $data[] = ['body' => $msg->body, 'created_at' => $msg->created_at->format('H:i'),
-                    'username' => $msg->user->name, 'userimage' => $msg->user->image_url];
-            }
-            if ($type === 'individual') {
-                $challenge = Challenge::where('id', $searchParam1)->orWhere('id', $searchParam2)
-                    ->first();
-                if ($challenge) {
-                    $challengeData = ['challengeStatus' => $challenge->status];
-                }
-            }
-
-
-            return array('status' => true, 'data' => $data, 'challengeData'=>$challengeData);
-        }
-        else{
-            return array('status' => false, 'messages' =>'something went wrong');
-        }
-
+//        if($this -> checkRequest($request, $id)) {
+//            $challengeData = [];
+//
+//            $searchParam1 = $user_id1 . '|' . $user_id2;
+//            $searchParam2 = $user_id2 . '|' . $user_id1;
+//
+//            ($type !== 'group') ? $messages = Message::where('id', $searchParam1)->orWhere('id', $searchParam2)
+//                ->get()
+//                : $messages = Message::where('id', $id)->get();
+//            $data = [];
+//            foreach ($messages as $msg) {
+//                $data[] = ['body' => $msg->body, 'created_at' => $msg->created_at->format('H:i'),
+//                    'username' => $msg->user->name, 'userimage' => $msg->user->image_url];
+//            }
+//            if ($type === 'individual') {
+//                $challenge = Challenge::where('id', $searchParam1)->orWhere('id', $searchParam2)
+//                    ->first();
+//                if ($challenge) {
+//                    $challengeData = ['challengeStatus' => $challenge->status];
+//                }
+//            }
+//
+//            return array('status' => true, 'data' => $data, 'challengeData'=>$challengeData);
+//        }
+//        else{
+//            return array('status' => false, 'messages' =>'something went wrong');
+//        }
+//
 
     }
 
@@ -158,23 +176,88 @@ class MessagesController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function getMore($id, $date)
+    public function getMore($id, $date, $type)
     {
+        $data = ['messageData' => [], 'gameData' => []];
 
-        $userid = auth()->user()->id . '|' . $id;
-        $userid2 = $id. '|' . auth()->user()->id;
-        $msg = new Message();
-        $messages = Message::where([
-            ['id', '=', $userid],
-            ['created_at', '>', $date]
-        ])->orWhere([
-            ['id', '=', $userid2],
-            ['created_at', '>', $date]
-        ])->orderBy('created_at','desc')->take(1)->get();
-        //return $date;
-        //$messages = Message::where('created_at', '>', $date)->whereIn('id', $userid)return $messages;
-        return $messages;
+        $this -> receiver = filter_var ( $id, FILTER_SANITIZE_STRING);
+        $date = filter_var ( $date, FILTER_SANITIZE_STRING);
+        $type = filter_var ( $type, FILTER_SANITIZE_STRING);
+        if(!$type || !$this->receiver || !$date){
+            return $this->sendResponse(true, $this->message['badRequest'], $data, null);
+        }
+
+        $user_id1 = $id;
+        $user_id2 = auth()->user()->id;
+
+        $searchParam1 = $user_id1 . '|' . $user_id2;
+        $searchParam2 = $user_id2 . '|' . $user_id1;
+
+
+        /**************************************************************************************************************************************/
+        // getting all the messages any way ( be it be individual user or group)
+
+        ($type !== 'group') ? $messages = Message::where('id', $searchParam1)->orWhere('id', $searchParam2)
+            ->get()
+            : $messages = Message::where('id', $id)->get();
+        foreach ($messages as $msg) {
+            $messageData[] = [
+                'body' => $msg->body,
+                'created_at' => $msg->created_at->format('H:i'),
+                'userName' => $msg->user->name,
+                'userImage' => $msg->user->image_url
+            ];
+        }
+
+        $data['messageData'] = $messageData;
+        return $this->sendResponse(true, $this -> message['newMessage'], $data, null);
+
     }
 
+
+    public function returnChallenge($player0, $player2, $condition){
+        //for challenges
+        $searchParam1  = $player0 . '|' . $player2;
+        $searchParam2  = $player2 . '|' . $player0;
+        switch($condition){
+            case 'neutral':
+                return  Challenge::where('id',$searchParam1)
+                    -> orWhere('id',$searchParam2)
+                    -> orderBy('created_at','desc')
+                    -> first();
+            case 'requested':
+                return  Challenge::where('id', $searchParam1)
+                    -> orWhere('id', $searchParam2)
+                    -> where('status','requested')
+                    -> orderBy('created_at','desc')
+                    -> first();
+        }
+
+    }
+
+    public function sendResponse($status, $message, $data, $challengeStatus){
+
+        return array(
+            'status' => $status,
+            'message' => $message,
+            'data' => $data,
+            'challengeStatus' => $challengeStatus
+        );
+
+    }
+
+    public function checkRequest($request, $id) {
+        $this -> type = $request->type;
+        ($request->id)
+            ? $this -> receiver = filter_var ( $request->id, FILTER_SANITIZE_STRING)
+            : $this -> receiver = filter_var ( $id, FILTER_SANITIZE_STRING);
+        if((( $this -> type === 'group' ) || ( $this -> type == 'individual' )) && $this -> receiver !== '') {
+            $this -> data = ['messageData' => [], 'gameData' => []];
+            $this -> sender = auth() -> user() -> id;
+            $this -> challengeStatus = null;
+            return true;
+        }
+        return false;
+    }
 
 }
