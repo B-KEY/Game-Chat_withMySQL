@@ -136,9 +136,7 @@
     </nav>
 
     @yield('content')
-</div><!-- Trigger/Open The Modal -->
-{{--<button id="myBtn">Open Modal</button>--}}
-
+</div>
 <!-- The Modal -->
 <div id="myModal" class="modal">
 

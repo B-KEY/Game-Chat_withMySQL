@@ -1,16 +1,3 @@
-//
-// var rollTheDice = function() {
-//     var i,
-//         faceValue,
-//         output = '',
-//         diceCount = document.querySelector('input[type=number]').value || 1;
-//     for (let i = 0; i < diceCount; i++) {
-//         faceValue = Math.floor(Math.random() * 6);
-//         output += "&#x268" + faceValue + "; ";
-//     }
-//     document.getElementById('dice').innerHTML = output;
-// }
-
 
 var game = {
     xhtmlns:"http://www.w3.org/1999/xhtml",
@@ -74,6 +61,8 @@ var game = {
             (x%2===0)?num--:num++;
             num+=10;
         }
+        // draw snakes and ladders
+        game.drawSnakesAndLadder();
         if(variable._receiverId$.attr('value') == gameData.player0.id){
             variable._thisPlayer = 'player1';
             variable._opponent = 'player0';
@@ -119,7 +108,6 @@ var game = {
 
         variable._gameId$.attr('value',gameData.game.id);
         document.querySelector('input[type=button]').addEventListener('click', function(){game.roll();});
-        game.drawSnakesAndLadder();
         //put the drop code on the document...
         document.getElementsByTagName('svg')[0].addEventListener('mouseup',drag.releaseMove,false);
         //put the go() method on the svg doc.
