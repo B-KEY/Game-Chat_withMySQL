@@ -8,7 +8,8 @@
 </p>
 
 ## Demo
-[!(https://img.youtube.com/vi/CQzHFIzcVTE/0.jpg)](https://www.youtube.com/watch?v=CQzHFIzcVTE&feature=youtu.be) .
+
+[![Real-time Chat with Snakes and Ladders](https://i.ytimg.com/vi/CQzHFIzcVTE/2.jpg)](https://www.youtube.com/watch?v=CQzHFIzcVTE&feature=youtu.be)
 
 ## About Laravel
 
