@@ -29,6 +29,10 @@ manager = {
         manager.myXHR('POST','./game/accept/' + id,'','').done(function( res ){
             if ( res.status ) {
                 messages.setMessageVaraibles(id, 'individual',$(e).text());
+                variable._inviteThisUser$.addClass('invisible');
+                variable._chatSection$.removeClass('col-md-12');
+                variable._gameSection$.addClass('col-md-8');
+                variable._chatSection$.addClass('col-md-4');
                 manager.getUserData(id,'individual');
             }
         });
@@ -74,6 +78,9 @@ manager = {
 
             messages.handleMessageSection(res.data.messageData);
             //messages.updateChat = setInterval(messages.getMoreMessages, 3000);
+            if(messages.type === 'group') {
+                return;
+            }
             if(res.challengeStatus){
                 variable._inviteThisUser$.addClass('invisible');
                 variable._chatSection$.removeClass('col-md-12');
@@ -82,12 +89,13 @@ manager = {
 
                 if(res.challengeStatus === 'requested'){
                     variable._gameSection$.append(variable._invitedDiv);
-                } else if(res.challengeStatus === 'accepted'){
+                } else if(res.challengeStatus === 'accepted') {
                     variable._gameSection$.append(variable._playgroundDiv);
                     game.drawGame(res.data.gameData);
-                }else{
-                    manager.getGameData($('#receiver_id').attr('value'));
                 }
+                // }else{
+                //     manager.getGameData($('#receiver_id').attr('value'));
+                // }
             }
             else{
                 variable._inviteThisUser$.removeClass('invisible');

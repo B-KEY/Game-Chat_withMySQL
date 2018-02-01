@@ -114,6 +114,7 @@ class DashboardController extends Controller
                         'userImage' => $msg->user->image_url
                     ];
                 }
+
                 /**************************************************************************************************************************************/
 
 
@@ -147,7 +148,8 @@ class DashboardController extends Controller
                     return $this -> sendResponse(true, $this -> message['success'], $data, $challengeStatus);
                 }
                 /**************************************************************************************************************************************/
-
+                $data['messageData'] = $messageData;
+                $data['gameData'] = [];
                 //return data for group users
                 return $this -> sendResponse(true, $this -> message['success'], $data, $challengeStatus);
 

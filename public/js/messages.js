@@ -38,6 +38,7 @@ var messages = {
     },
 
     handleMessageSection: function(response) {
+        console.log(response);
         if( response.length === 0 ) return;
         if( response.length === 1 ) {
             messages.createChat(response);

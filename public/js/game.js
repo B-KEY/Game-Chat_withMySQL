@@ -11,6 +11,7 @@ var game = {
     BOARDHEIGHT: 0,			//how many squares down
     CELLSIZE: 0,
     turn: '',
+
     thisPlayer: {
       id: '',
       score: '',
@@ -18,6 +19,7 @@ var game = {
       piece:'',
       name:''
     },
+
     opponent: {
         id: '',
         score: '',
@@ -25,12 +27,11 @@ var game = {
         piece:'',
         name:''
     },
-    id:'',
-    update: '',
 
+    id:'', // id of the game
+    update: '', //interval call to get opponent move
 
     drawGame: function (gameData){
-        console.log(gameData);
         //create a parent to stick board in...
         var gEle = document.createElementNS(game.svgns, 'g');
         gEle.setAttributeNS(null, 'transform', 'translate(' + game.BOARDX + ',' + game.BOARDY + ')');
@@ -63,7 +64,8 @@ var game = {
         }
         // draw snakes and ladders
         game.drawSnakesAndLadder();
-        if(variable._receiverId$.attr('value') == gameData.player0.id){
+
+        if(variable._receiverId$.attr('value') == gameData.player0.id) {
             variable._thisPlayer = 'player1';
             variable._opponent = 'player0';
 
@@ -113,6 +115,10 @@ var game = {
         //put the go() method on the svg doc.
         document.getElementsByTagName('svg')[0].addEventListener('mousemove',drag.go,false);
         variable._error$ = $('#error');
+
+        if(game.turn != Number(game.thisPlayer.id)) {
+            game.update = setInterval(game.getUpdate, 3000);
+        }
     },
 
     roll: function() {
@@ -136,131 +142,6 @@ var game = {
         }
     },
 
-    drawSnakesAndLadder: function() {
-
-        // 95 - 75
-        var arrEllipse = [10, 75, 15, 7];
-        var arrLine = [20, 20, 80, 180];
-        var arrTranslate = [280, -35];
-        game.drawSnake(arrTranslate, arrEllipse, arrLine);
-        // 98 - 78
-         arrEllipse = [10, 75, 15, 7];
-         arrLine = [20, 20, 80, 180];
-         arrTranslate = [120, -35];
-        game.drawSnake(arrTranslate, arrEllipse, arrLine);
-        //87 - 24
-         arrEllipse = [10, 75, 15, 7];
-         arrLine = [20, -140, 80, 380]
-         arrTranslate = [330, 20]
-        game.drawSnake(arrTranslate, arrEllipse, arrLine);
-
-        // 54 -34
-         arrEllipse = [10, 75, 15, 7];
-         arrLine = [20, 20, 80, 180];
-         arrTranslate = [330, 160];
-        game.drawSnake(arrTranslate, arrEllipse, arrLine);
-
-        // 64 - 60
-         arrEllipse = [10, 75, 15, 7];
-         arrLine = [20,-140, 80, 140]
-         arrTranslate = [180, 100]
-        game.drawSnake(arrTranslate, arrEllipse, arrLine);
-
-        // 17 -7
-         arrEllipse = [10, 75, 15, 7];
-         arrLine = [20,160, 80, 140]
-         arrTranslate = [180, 350]
-        game.drawSnake(arrTranslate, arrEllipse, arrLine);
-
-    //ladders
-         // 4-14
-        var arrLine1 = [20, -130, 75, 130];
-        var arrLine2 = [20,-130, 95, 150]
-        var arrTranslate = [300, 350]
-        game.drawLadder(arrTranslate, arrLine1, arrLine2);
-
-        //20-38
-         arrLine1 = [10, -120, 75, 180];
-         arrLine2 = [10, -120, 95, 200]
-         arrTranslate = [140, 250]
-        game.drawLadder(arrTranslate, arrLine1, arrLine2);
-
-        //28-84
-         arrLine1 = [10, 200, 90, 370];
-         arrLine2 = [20, 220, 70, 370]
-        arrTranslate = [180, 10]
-        game.drawLadder(arrTranslate, arrLine1, arrLine2);
-
-         // 81- 63
-
-        arrLine1 = [10, 100, 90, 180];
-        arrLine2 = [20, 120, 70, 180]
-        arrTranslate = [20, 10]
-        game.drawLadder(arrTranslate, arrLine1, arrLine2);
-
-        //59-40
-        arrLine1 = [10, -60, 75, 160];
-        arrLine2 = [10, -60, 95, 180]
-        arrTranslate = [70, 160]
-        game.drawLadder(arrTranslate, arrLine1, arrLine2);
-
-
-    },
-    drawSnake : function(arrTranslate,arrEllipse, arrLine) {
-        var gEle = document.createElementNS(game.svgns, 'g');
-        gEle.setAttributeNS(null, 'transform', 'translate(' + arrTranslate[0] + ',' + arrTranslate[1]  + ')');
-        //stick g on board
-
-        var ellipse = document.createElementNS(game.svgns, 'ellipse');
-        ellipse.setAttributeNS(null,'cx', arrEllipse[0]);
-        ellipse.setAttributeNS(null,'cy',arrEllipse[1]);
-        ellipse.setAttributeNS(null,'rx',arrEllipse[2]);
-        ellipse.setAttributeNS(null,'ry',arrEllipse[3]);
-        ellipse.setAttributeNS(null,'stroke',"#4C516D");
-        ellipse.setAttributeNS(null,'fill',"red");
-        ellipse.setAttributeNS(null,'stroke-width','5px');
-        ellipse.setAttributeNS(null,'opacity', '1');
-
-        var line1 = document.createElementNS(game.svgns,'line');
-        line1.setAttributeNS(null, 'x1', arrLine[0]);
-        line1.setAttributeNS(null, 'x2', arrLine[1]);
-        line1.setAttributeNS(null, 'y1', arrLine[2]);
-        line1.setAttributeNS(null,'y2', arrLine[3]);
-        line1.setAttributeNS(null, 'stroke',"#4C516D");
-        line1.setAttributeNS(null, 'stroke-width','8px');
-        line1.setAttributeNS(null, 'opacity', '0.6');
-
-        gEle.appendChild(ellipse);
-        gEle.appendChild(line1);
-        document.getElementsByTagName('svg')[0].appendChild(gEle);
-    },
-    drawLadder: function(arrTranslate, arrLine1, arrLine2) {
-
-
-         var gEle = document.createElementNS(game.svgns, 'g');
-         gEle.setAttributeNS(null, 'transform', 'translate(' + arrTranslate[0] + ',' + arrTranslate[1] + ')');
-        var line1 = document.createElementNS(game.svgns,'line');
-        line1.setAttributeNS(null, 'x1', arrLine1[0]);
-        line1.setAttributeNS(null, 'x2', arrLine1[1]);
-        line1.setAttributeNS(null, 'y1', arrLine1[2]);
-        line1.setAttributeNS(null,'y2', arrLine1[3]);
-        line1.setAttributeNS(null, 'stroke',"green");
-        line1.setAttributeNS(null, 'stroke-width','4px');
-        line1.setAttributeNS(null, 'opacity', '0.5');
-
-        var line2 = document.createElementNS(game.svgns,'line');
-        line2.setAttributeNS(null, 'x1', arrLine2[0]);
-        line2.setAttributeNS(null, 'x2', arrLine2[1]);
-        line2.setAttributeNS(null, 'y1', arrLine2[2]);
-        line2.setAttributeNS(null,'y2', arrLine2[3]);
-        line2.setAttributeNS(null, 'stroke',"green");
-        line2.setAttributeNS(null, 'stroke-width','4px');
-        line2.setAttributeNS(null, 'opacity', '0.5');
-        gEle.appendChild(line1);
-        gEle.appendChild(line2);
-        document.getElementsByTagName('svg')[0].appendChild(gEle);
-
-    },
 
     setLables: function(player0Name, player0Score, player1Name, player1Score) {
         variable._player0Name$ = $('#player0Name'),
@@ -275,7 +156,6 @@ var game = {
 
     },
     updateGameData: function(gameData) {
-        console.log(gameData);
         if(gameData.result){
             var text = '';
             if( gameData.result.winner == game.thisPlayer.id){
@@ -314,7 +194,6 @@ var game = {
             );
             variable._player0Score$.text(' : ' + (Number(res.data.gameData.player.score)));
             game.update = setInterval(game.getUpdate, 2000);
-
         });
     },
 
@@ -358,15 +237,143 @@ var game = {
             });
     },
     canChangeUser : function () {
-
       if( game.turn == game.thisPlayer.id && game.thisPlayer.rolled == 'yes'){
           return true;
       }
       clearInterval(game.update);
       return false;
-    }
-}
+    },
+    drawSnakesAndLadder: function() {
 
+        // 95 - 75
+        var arrEllipse = [10, 75, 15, 7];
+        var arrLine = [20, 20, 80, 180];
+        var arrTranslate = [280, -35];
+        game.drawSnake(arrTranslate, arrEllipse, arrLine);
+        // 98 - 78
+        arrEllipse = [10, 75, 15, 7];
+        arrLine = [20, 20, 80, 180];
+        arrTranslate = [120, -35];
+        game.drawSnake(arrTranslate, arrEllipse, arrLine);
+        //87 - 24
+        arrEllipse = [10, 75, 15, 7];
+        arrLine = [20, -140, 80, 380]
+        arrTranslate = [330, 20]
+        game.drawSnake(arrTranslate, arrEllipse, arrLine);
+
+        // 54 -34
+        arrEllipse = [10, 75, 15, 7];
+        arrLine = [20, 20, 80, 180];
+        arrTranslate = [330, 160];
+        game.drawSnake(arrTranslate, arrEllipse, arrLine);
+
+        // 64 - 60
+        arrEllipse = [10, 75, 15, 7];
+        arrLine = [20,-140, 80, 140]
+        arrTranslate = [180, 100]
+        game.drawSnake(arrTranslate, arrEllipse, arrLine);
+
+        // 17 -7
+        arrEllipse = [10, 75, 15, 7];
+        arrLine = [20,160, 80, 140]
+        arrTranslate = [180, 350]
+        game.drawSnake(arrTranslate, arrEllipse, arrLine);
+
+        //ladders
+        // 4-14
+        var arrLine1 = [20, -130, 75, 130];
+        var arrLine2 = [20,-130, 95, 150]
+        var arrTranslate = [300, 350]
+        game.drawLadder(arrTranslate, arrLine1, arrLine2);
+
+        //20-38
+        arrLine1 = [10, -120, 75, 180];
+        arrLine2 = [10, -120, 95, 200]
+        arrTranslate = [140, 250]
+        game.drawLadder(arrTranslate, arrLine1, arrLine2);
+
+        //28-84
+        arrLine1 = [10, 200, 90, 370];
+        arrLine2 = [20, 220, 70, 370]
+        arrTranslate = [180, 10]
+        game.drawLadder(arrTranslate, arrLine1, arrLine2);
+
+        // 81- 63
+
+        arrLine1 = [10, 100, 90, 180];
+        arrLine2 = [20, 120, 70, 180]
+        arrTranslate = [20, 10]
+        game.drawLadder(arrTranslate, arrLine1, arrLine2);
+
+        //59-40
+        arrLine1 = [10, -60, 75, 160];
+        arrLine2 = [10, -60, 95, 180]
+        arrTranslate = [70, 160]
+        game.drawLadder(arrTranslate, arrLine1, arrLine2);
+
+        //71-91
+        arrLine1 = [10, 10, 70, 160];
+        arrLine2 = [25, 25, 70, 160];
+        arrTranslate = [470, -25];
+        game.drawLadder(arrTranslate, arrLine1, arrLine2);
+
+
+    },
+    drawSnake : function(arrTranslate,arrEllipse, arrLine) {
+        var gEle = document.createElementNS(game.svgns, 'g');
+        gEle.setAttributeNS(null, 'transform', 'translate(' + arrTranslate[0] + ',' + arrTranslate[1]  + ')');
+        //stick g on board
+
+        var ellipse = document.createElementNS(game.svgns, 'ellipse');
+        ellipse.setAttributeNS(null,'cx', arrEllipse[0]);
+        ellipse.setAttributeNS(null,'cy',arrEllipse[1]);
+        ellipse.setAttributeNS(null,'rx',arrEllipse[2]);
+        ellipse.setAttributeNS(null,'ry',arrEllipse[3]);
+        ellipse.setAttributeNS(null,'stroke',"#4C516D");
+        ellipse.setAttributeNS(null,'fill',"red");
+        ellipse.setAttributeNS(null,'stroke-width','5px');
+        ellipse.setAttributeNS(null,'opacity', '1');
+
+        var line1 = document.createElementNS(game.svgns,'line');
+        line1.setAttributeNS(null, 'x1', arrLine[0]);
+        line1.setAttributeNS(null, 'x2', arrLine[1]);
+        line1.setAttributeNS(null, 'y1', arrLine[2]);
+        line1.setAttributeNS(null,'y2', arrLine[3]);
+        line1.setAttributeNS(null, 'stroke',"#4C516D");
+        line1.setAttributeNS(null, 'stroke-width','8px');
+        line1.setAttributeNS(null, 'opacity', '0.6');
+
+        gEle.appendChild(ellipse);
+        gEle.appendChild(line1);
+        document.getElementsByTagName('svg')[0].appendChild(gEle);
+    },
+    drawLadder: function(arrTranslate, arrLine1, arrLine2) {
+
+        var gEle = document.createElementNS(game.svgns, 'g');
+        gEle.setAttributeNS(null, 'transform', 'translate(' + arrTranslate[0] + ',' + arrTranslate[1] + ')');
+        var line1 = document.createElementNS(game.svgns,'line');
+        line1.setAttributeNS(null, 'x1', arrLine1[0]);
+        line1.setAttributeNS(null, 'x2', arrLine1[1]);
+        line1.setAttributeNS(null, 'y1', arrLine1[2]);
+        line1.setAttributeNS(null,'y2', arrLine1[3]);
+        line1.setAttributeNS(null, 'stroke',"green");
+        line1.setAttributeNS(null, 'stroke-width','4px');
+        line1.setAttributeNS(null, 'opacity', '0.5');
+
+        var line2 = document.createElementNS(game.svgns,'line');
+        line2.setAttributeNS(null, 'x1', arrLine2[0]);
+        line2.setAttributeNS(null, 'x2', arrLine2[1]);
+        line2.setAttributeNS(null, 'y1', arrLine2[2]);
+        line2.setAttributeNS(null,'y2', arrLine2[3]);
+        line2.setAttributeNS(null, 'stroke',"green");
+        line2.setAttributeNS(null, 'stroke-width','4px');
+        line2.setAttributeNS(null, 'opacity', '0.5');
+        gEle.appendChild(line1);
+        gEle.appendChild(line2);
+        document.getElementsByTagName('svg')[0].appendChild(gEle);
+
+    }
+};
 
 var drag={
     //the problem of dragging....
@@ -442,8 +449,13 @@ var drag={
             }
         }
         return false;
-    },
+    }
+};
 
-
-
-}
+window.onbeforeunload = function(event)
+{
+    if(game.thisPlayer.rolled == 'yes' && game.turn == game.thisPlayer.id) {
+        game.updateBoard();
+    }
+    return confirm("Confirm refresh");
+};

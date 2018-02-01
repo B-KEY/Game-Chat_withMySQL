@@ -58,11 +58,11 @@ class GameController extends Controller
             $challengeStatus = null;
 
             // define snakes presence and how much it will take you down
-            $snake = array(0 => 95, 1 => 98, 3 => 87, 4 => 54, 5 => 64, 6 => 17);
+            $snake = array(0 => 95, 1 => 98, 2 => 87, 3 => 54, 4 => 64, 5 => 17);
             $snakeByteDiff = [20, 20, 63, 20, 4, 10];
 
             // define ladders and how much clim to clim
-            $ladder = array(0 => 4, 1 => 20, 3 => 28, 4 => 40, 5 => 63, 6 => 71);
+            $ladder = array(0 => 4, 1 => 20, 2 => 28, 3 => 40, 4 => 63, 5 => 71);
             $ladderClimDiff = [10, 18, 56, 19, 18, 20];
 
             //roll the dice
@@ -114,13 +114,17 @@ class GameController extends Controller
                     $snakeIndex = array_search($newScore, $snake);
                     $ladderIndex = array_search($newScore, $ladder);
 
-                    if ($snakeIndex) {// test if this is a snake byte
+
+
+                    if ($snakeIndex !== false) {// test if this is a snake byte
                         $newScore = $newScore - $snakeByteDiff[$snakeIndex];
                     }
 
-                    if ($ladderIndex) { // test if this is a ladder climb
-                        $newScore = $newScore + $ladderClimDiff[$snakeIndex];
+                    if ($ladderIndex !== false) { // test if this is a ladder climb
+                        $newScore = $newScore + $ladderClimDiff[$ladderIndex];
                     }
+
+
 
                     if ($newScore > 99) {  //check if new dice value is making the more than 100;
                         $gameMove->{$player . '_rolled'} = 'yes';
@@ -160,9 +164,8 @@ class GameController extends Controller
 
                         $gameMove->save();
 
+
                         if ((int)$gameMove->{$player . '_score'} === 99) {
-                            $challenge->status = 'finished';
-                            $challenge->save();
                             $challengeStatus = $challenge->status;
                             $result = new Result();
                             $result->game_id = $gameId;
@@ -170,10 +173,19 @@ class GameController extends Controller
                             $result->loser = $gameMove->{$opponentId . '_id'};
                             $result->save();
                             $returnResult = ['gameId' => $result->game_id, 'winner' => $result->winner, 'loser' => $result->loser];
-                            $gameData = ['result' => $returnResult];
+                            $gameData = [
+                                'game' => [
+                                    'id' => $gameMove->game_id,
+                                    'whoseTurn' => $gameMove->whoseTurn,
+                                    'diceValue' => $diceValue
+                                ],
+                                'result' => $returnResult
+                            ];
                             $data['gameData'] = $gameData;
                             return $this->sendResponse(true, $this->message['won'], $data, $challengeStatus);
                         }
+
+
                         $gameData = [
                             'game' => [
                                 'id' => $gameMove->game_id,
@@ -292,7 +304,14 @@ class GameController extends Controller
             if ($challengeStatus === 'finished') {
                 $result = Result::where('game_id', $id)->first();
                 $returnResult = ['gameId' => $result->game_id, 'winner' => $result->winner, 'loser' => $result->loser];
-                $gameData = ['result' => $returnResult];
+                $gameData = [
+                    'game' => [
+                        'id' => $gameMove->game_id,
+                        'whoseTurn' => $gameMove->whoseTurn,
+                        'diceValue' => 0
+                    ],
+                    'result' => $returnResult
+                ];
                 $data['gameData'] = $gameData;
                 return $this->sendResponse(
                     true,
@@ -301,7 +320,6 @@ class GameController extends Controller
                     $challengeStatus
                 );
             }
-
             if ($gameMove->{$opponent . '_rolled'} == 'yes' && $gameMove->{$thisPlayer . '_rolled'} == 'no') {
                 $data = ['messageData' => [], 'gameData' => []];
                 $gameData = [
@@ -476,31 +494,31 @@ class GameController extends Controller
         }
     }
 
-//
-//    /**
-//     *
-//     */
-//    public function getChallenges($id){
-//        if($id !== ''){
-//            $user = auth()->user()->id;
-//            $challenge = $this -> returnChallenge($user, $id, 'requested');
-//            $data = ['challenge' => $challenge];
-//            return array('status'=> true, 'data' => $data);
-//        }
-//    }
-//
-//    public function getBoardData($id) {
-//        $user = auth()->user()->id;
-//        $searchParam1 = $id . '|' . $user;
-//        $searchParam2 = $user . '|' . $id;
-//        $challenge = Challenge::where('id', $searchParam1)->orWhere('id', $searchParam2)
-//            ->first();
-//        $dimension = explode('x', $challenge->game->board_dimension);
-//        $gameData = ['height' => $dimension[0], 'width' => $dimension[1], 'size' => $dimension[2], 'who_start' => $challenge->game->who_start,
-//            'gameID' => $challenge->game_id, 'positionX' => 0, 'positionY' => 0];
-//        $data = ['status' => $challenge->status, 'message' => 'Game started', 'gameData' => $gameData];
-//        return array('status' => true, 'data' => $data);
-//    }
+
+    /**
+     *
+     */
+    public function getChallenges($id){
+        if($id !== ''){
+            $user = auth()->user()->id;
+            $challenge = $this -> returnChallenge($user, $id, 'requested');
+            $data = ['challenge' => $challenge];
+            return array('status'=> true, 'data' => $data);
+        }
+    }
+
+    public function getBoardData($id) {
+        $user = auth()->user()->id;
+        $searchParam1 = $id . '|' . $user;
+        $searchParam2 = $user . '|' . $id;
+        $challenge = Challenge::where('id', $searchParam1)->orWhere('id', $searchParam2)
+            ->first();
+        $dimension = explode('x', $challenge->game->board_dimension);
+        $gameData = ['height' => $dimension[0], 'width' => $dimension[1], 'size' => $dimension[2], 'who_start' => $challenge->game->who_start,
+            'gameID' => $challenge->game_id, 'positionX' => 0, 'positionY' => 0];
+        $data = ['status' => $challenge->status, 'message' => 'Game started', 'gameData' => $gameData];
+        return array('status' => true, 'data' => $data);
+    }
 
     /******************************************************************************************************************************************/
     /*********************************************** helper function to return consistent response ********************************************/
